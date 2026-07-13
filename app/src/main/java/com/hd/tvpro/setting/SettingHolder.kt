@@ -15,7 +15,6 @@ import androidx.media3.common.C
 import androidx.media3.common.Format
 import com.hd.tvpro.R
 import com.hd.tvpro.constants.AppConfig
-import com.hd.tvpro.event.SwitchUrlChange
 import com.hd.tvpro.util.PreferenceMgr
 import com.hd.tvpro.util.ShareUtil
 import com.hd.tvpro.util.StringUtil
@@ -23,13 +22,7 @@ import com.hd.tvpro.util.ToastMgr
 import com.hd.tvpro.video.model.TrackHolder
 import com.hd.tvpro.view.SelectListView
 import org.greenrobot.eventbus.EventBus
-import com.hd.tvpro.service.model.LiveItem
 
-/**
- * 作者：By 15968
- * 日期：On 2021/10/26
- * 时间：At 15:33
- */
 class SettingHolder constructor(
     private val context: Context,
     private val settingUpdateListener: SettingUpdateListener
@@ -59,18 +52,10 @@ class SettingHolder constructor(
     private fun setSettingText(
         index: Int,
         nowUrl: String?,
-        liveItem: LiveItem?,
         trackHolder: TrackHolder?
     ) {
         try {
             settingArrayList.clear()
-            if (liveItem != null && liveItem.urls.isNotEmpty()) {
-                val switchOption = SettingOption("线路切换")
-                for (item in liveItem.urls.withIndex()) {
-                    switchOption.mRightList.add("线路${item.index + 1}")
-                }
-                settingArrayList.add(switchOption)
-            }
             audioFormatMap.clear()
             subtitleFormatMap.clear()
             if (trackHolder != null) {
@@ -80,12 +65,12 @@ class SettingHolder constructor(
                     val subtitleFormats: MutableList<Format> = java.util.ArrayList()
                     for (i in 0 until mappedTrackInfo.rendererCount) {
                         val rendererTrackGroups = mappedTrackInfo.getTrackGroups(i)
-                        if (C.TRACK_TYPE_AUDIO == mappedTrackInfo.getRendererType(i)) { //判断是否是音轨
+                        if (C.TRACK_TYPE_AUDIO == mappedTrackInfo.getRendererType(i)) {
                             for (groupIndex in 0 until rendererTrackGroups.length) {
                                 val trackGroup = rendererTrackGroups[groupIndex]
                                 audioFormats.add(trackGroup.getFormat(0))
                             }
-                        } else if (C.TRACK_TYPE_TEXT == mappedTrackInfo.getRendererType(i)) { //判断是否是字幕
+                        } else if (C.TRACK_TYPE_TEXT == mappedTrackInfo.getRendererType(i)) {
                             for (groupIndex in 0 until rendererTrackGroups.length) {
                                 val trackGroup = rendererTrackGroups[groupIndex]
                                 subtitleFormats.add(trackGroup.getFormat(0))
@@ -175,7 +160,7 @@ class SettingHolder constructor(
 
             val aboutOption = SettingOption("关于软件")
             aboutOption.mRightList.add("新版下载地址")
-            aboutOption.mRightList.add("新方圆小棉袄")
+            aboutOption.mRightList.add("派大星开发呀")
             val versionName = try {
                 val pkName = context.packageName
                 context.packageManager.getPackageInfo(
@@ -218,14 +203,6 @@ class SettingHolder constructor(
                 "开机启动" -> {
                     val selfStart = PreferenceMgr.getBoolean(context, "selfStart", false)
                     mAdapterSettingValue!!.setSelection(if (selfStart) 1 else 0)
-                }
-                "线路切换" -> {
-                    for (item in liveItem!!.urls.withIndex()) {
-                        if (item.value == nowUrl) {
-                            mAdapterSettingValue!!.setSelection(item.index)
-                            break
-                        }
-                    }
                 }
                 "音频轨道" -> {
                     var audio: String? = null
@@ -277,7 +254,6 @@ class SettingHolder constructor(
                 }
             }
             mSettingValueList!!.setOnItemClickListener { parent, v, posval, id ->
-                //单击项目时
                 when (settingArrayList.get(pos).mLeftValue) {
                     "屏幕比例" -> {
                         PreferenceMgr.put(context, "screen", posval)
@@ -310,11 +286,6 @@ class SettingHolder constructor(
                             ToastMgr.shortBottomCenter(context, "投屏记录已清空")
                         }
                     }
-                    "线路切换" -> {
-                        val url = liveItem!!.urls[posval]
-                        EventBus.getDefault().post(SwitchUrlChange(url))
-                        hide()
-                    }
                     "音频轨道" -> {
                         if (audioFormatMap.containsKey(posval)) {
                             val format = audioFormatMap[posval]
@@ -337,7 +308,7 @@ class SettingHolder constructor(
                         if (settingArrayList[pos].mRightList[posval] == "退出软件") {
                             settingUpdateListener.update(Option.FINISH)
                         } else {
-                            ShareUtil.startUrl(context, "https://haikuo.lanzoui.com/u/GoldRiver")
+                            ShareUtil.startUrl(context, "https://pan.quark.cn/s/61d324167c07")
                         }
                     }
                     else -> {
@@ -356,7 +327,6 @@ class SettingHolder constructor(
     fun show(
         anchor: View,
         nowUrl: String? = null,
-        liveItem: LiveItem? = null,
         trackHolder: TrackHolder? = null
     ) {
         settingView = LayoutInflater.from(context).inflate(R.layout.layout_setting, null)
@@ -370,7 +340,7 @@ class SettingHolder constructor(
         val fontSize = width / 42
         AppConfig.fontSize = fontSize
         mSettingList = settingView!!.findViewById<View>(R.id.lv_setting_left) as SelectListView
-        setSettingText(0, nowUrl, liveItem, trackHolder)
+        setSettingText(0, nowUrl, trackHolder)
         mSettingList.requestFocus()
         mAdapterSetting = ListViewAdapterSettingLeft(context, settingArrayList!!, 0)
         mSettingList.pos = 0
@@ -387,7 +357,7 @@ class SettingHolder constructor(
                 parent: AdapterView<*>?, view: View,
                 position: Int, id: Long
             ) {
-                setSettingText(position, nowUrl, liveItem, trackHolder)
+                setSettingText(position, nowUrl, trackHolder)
                 mSettingPos = position
                 mAdapterSetting!!.setSelection(position)
                 mSettingList.setSelect(position, 0)
@@ -396,14 +366,13 @@ class SettingHolder constructor(
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
         mSettingList.setOnItemClickListener { adapter, v, pos, id ->
-            setSettingText(pos, nowUrl, liveItem, trackHolder)
+            setSettingText(pos, nowUrl, trackHolder)
             mAdapterSetting!!.setSelection(pos)
             mSettingList.setSelect(pos, 0)
         }
 
         AppConfig.settingHeight = height / 12 - mSettingList.dividerHeight
 
-        //展示window
         settingWindow = PopupWindow(settingView, width / 2, ViewGroup.LayoutParams.WRAP_CONTENT)
         settingWindow?.let {
             it.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))

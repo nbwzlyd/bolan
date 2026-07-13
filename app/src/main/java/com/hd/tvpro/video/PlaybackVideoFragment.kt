@@ -40,9 +40,7 @@ import com.hd.tvpro.MainActivity
 import com.hd.tvpro.R
 import com.hd.tvpro.app.App
 import com.hd.tvpro.event.PlayUrlChange
-import com.hd.tvpro.event.SubChange
 import com.hd.tvpro.event.SwitchUrlChange
-import com.hd.tvpro.setting.LiveListHolder
 import com.hd.tvpro.setting.SettingHolder
 import com.hd.tvpro.setting.CastRecordHolder
 import com.hd.tvpro.util.*
@@ -53,8 +51,6 @@ import com.hd.tvpro.video.MyPlaybackTransportControlGlue
 import com.hd.tvpro.video.VideoDataHelper
 import com.hd.tvpro.video.model.DlanUrlDTO
 import com.hd.tvpro.video.model.TrackHolder
-import com.hd.tvpro.service.LiveModel
-import com.hd.tvpro.service.model.LiveItem
 import com.hd.tvpro.util.FileUtil
 import com.hd.tvpro.util.CastRecordMgr
 import com.pngcui.skyworth.dlna.center.DLNAGenaEventBrocastFactory
@@ -84,16 +80,14 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
     private var useDlan = false
     private var lastShowToastTime1: Long = 0
     private var lastShowToastTime2: Long = 0
-    private var liveListHolder: LiveListHolder? = null
-    private var liveItem: LiveItem? = null
-
-    private var webDlanData: DlanUrlDTO? = null
-
-    private var trackHolder: TrackHolder? = null
     private var isLongPressLeft = false
     private var isLongPressRight = false
     private var longPressJob: Job? = null
     private var castRecordHolder: CastRecordHolder? = null
+
+    private var webDlanData: DlanUrlDTO? = null
+
+    private var trackHolder: TrackHolder? = null
 
     fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         return false
@@ -122,13 +116,6 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
             settingHolder!!.hide()
             return true
         }
-        if (liveListHolder != null && liveListHolder!!.isShowing()) {
-            if (isControlsOverlayVisible) {
-                hideControlsOverlay(false)
-            }
-            liveListHolder!!.hide()
-            return true
-        }
         if (isControlsOverlayVisible && view != null) {
             hideControlsOverlay(false)
             return true
@@ -144,13 +131,6 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
         val glueHost = androidx.leanback.app.VideoSupportFragmentGlueHost(this@PlaybackVideoFragment)
         playerAdapter = MediaPlayerAdapter(requireActivity(), videoView, videoDataHelper)
 
-        playerAdapter.playStartTask = Runnable {
-            if (liveItem != null && !liveItem!!.urls.isNullOrEmpty() && playerAdapter.player?.isCurrentWindowLive == true) {
-                playerAdapter.mMediaSourceUri?.let {
-                    LiveModel.addGoodUrl(requireContext(), liveItem!!.name, it)
-                }
-            }
-        }
         playerAdapter.onTracksChangedListener = object : MediaPlayerAdapter.TracksChangedListener {
             override fun onTracksChanged(tracks: androidx.media3.common.Tracks) {
                 trackHolder = TrackHolder(tracks, {
@@ -167,21 +147,6 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
         mTransportControlGlue.playWhenPrepared()
         mTransportControlGlue.isControlsOverlayAutoHideEnabled = true
         mTransportControlGlue.isSeekEnabled = true
-        mTransportControlGlue.onKeyInterceptor =
-            object : MyPlaybackTransportControlGlue.OnKeyInterceptor {
-                override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
-                    if (keyCode == KeyEvent.KEYCODE_MENU) {
-                        showSetting()
-                        return true
-                    } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                        if (!isControlsOverlayVisible && (liveListHolder == null || !liveListHolder!!.isShowing())) {
-                            showLive()
-                            return true
-                        }
-                    }
-                    return false
-                }
-            }
 
         mTransportControlGlue.seekProvider = object : PlaybackSeekDataProvider() {
             override fun getSeekPositions(): LongArray {
@@ -203,18 +168,11 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
         if (!initTitle.isNullOrEmpty()) {
             mTransportControlGlue.title = "\n" + initTitle
             mTransportControlGlue.subtitle = initUrl
-            val urls = PreferenceMgr.getString(context, "playUrls", "")
-            if (urls.isNotEmpty()) {
-                liveItem = LiveItem(initTitle, ArrayList(urls.split("|||")))
-            }
         }
 
         playerAdapter.setDataSource(initUrl, null)
-        LiveListHolder.loadBackground(requireContext())
         val parent = view.parent as ViewGroup
         parent.addView(videoView, 0)
-
-
 
 
         val subtitleView: SubtitleView? = videoView.subtitleView
@@ -249,14 +207,6 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
                     DLNAGenaEventBrocastFactory.sendPlayStateEvent(App.INSTANCE)
                 } else {
                     DLNAGenaEventBrocastFactory.sendPauseStateEvent(App.INSTANCE)
-                }
-            }
-
-            override fun onError(adapter: PlayerAdapter?, errorCode: Int, errorMessage: String?) {
-                if (liveItem != null && !liveItem!!.urls.isNullOrEmpty()) {
-                    playerAdapter.mMediaSourceUri?.let {
-                        LiveModel.clearGoodUrl(requireContext(), it)
-                    }
                 }
             }
         })
@@ -384,93 +334,59 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
                         return true
                     }
                 }
-                KeyEvent.KEYCODE_DPAD_UP -> {
-                    if (playerAdapter.player?.isCurrentWindowLive == true) {
-                        showLive()
-                        return true
-                    }
-                }
-                KeyEvent.KEYCODE_DPAD_DOWN -> {
-                    if (playerAdapter.player?.isCurrentWindowLive == true) {
-                        showLive()
-                        return true
-                    }
-                }
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
-                    val liveIndex = findLiveIndex()
-                    val isLive = playerAdapter.player?.isCurrentWindowLive == true || liveIndex >= 0
-                    if (!isLive && !isSeekable()) {
+                    if (!isSeekable()) {
                         if (keyAction == KeyEvent.ACTION_DOWN) {
                             ToastMgr.shortBottomCenter(context, "该视频不支持快进")
                         }
                         return true
                     }
-                    if (isLive) {
-                        if (keyAction == KeyEvent.ACTION_DOWN) {
-                            if (liveIndex > 0) {
-                                onSwitch(SwitchUrlChange(liveItem!!.urls[liveIndex - 1]))
-                                ToastMgr.shortBottomCenter(context, "已切换线路${liveIndex}")
+                    if (keyAction == KeyEvent.ACTION_DOWN) {
+                        isLongPressLeft = false
+                        fastPositionJump(-15)
+                        val now = System.currentTimeMillis()
+                        if (now - lastShowToastTime1 > 5 * 1000) {
+                            ToastMgr.shortBottomCenter(context, "已快退15秒")
+                        }
+                        lastShowToastTime1 = now
+                        scope.launch {
+                            delay(500)
+                            if (!isLongPressLeft && isResumed) {
+                                isLongPressLeft = true
+                                startLongPressSeek(-15)
                             }
                         }
-                    } else {
-                        if (keyAction == KeyEvent.ACTION_DOWN) {
-                            isLongPressLeft = false
-                            fastPositionJump(-15)
-                            val now = System.currentTimeMillis()
-                            if (now - lastShowToastTime1 > 5 * 1000) {
-                                ToastMgr.shortBottomCenter(context, "已快退15秒")
-                            }
-                            lastShowToastTime1 = now
-                            scope.launch {
-                                delay(500)
-                                if (!isLongPressLeft && isResumed) {
-                                    isLongPressLeft = true
-                                    startLongPressSeek(-15)
-                                }
-                            }
-                        } else if (keyAction == KeyEvent.ACTION_UP) {
-                            isLongPressLeft = false
-                            stopLongPressSeek()
-                        }
+                    } else if (keyAction == KeyEvent.ACTION_UP) {
+                        isLongPressLeft = false
+                        stopLongPressSeek()
                     }
                     return true
                 }
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    val liveIndex = findLiveIndex()
-                    val isLive = playerAdapter.player?.isCurrentWindowLive == true || liveIndex >= 0
-                    if (!isLive && !isSeekable()) {
+                    if (!isSeekable()) {
                         if (keyAction == KeyEvent.ACTION_DOWN) {
                             ToastMgr.shortBottomCenter(context, "该视频不支持快进")
                         }
                         return true
                     }
-                    if (isLive) {
-                        if (keyAction == KeyEvent.ACTION_DOWN) {
-                            if (liveIndex >= 0 && liveIndex < liveItem!!.urls.size - 1) {
-                                onSwitch(SwitchUrlChange(liveItem!!.urls[liveIndex + 1]))
-                                ToastMgr.shortBottomCenter(context, "已切换线路${liveIndex + 2}")
+                    if (keyAction == KeyEvent.ACTION_DOWN) {
+                        isLongPressRight = false
+                        fastPositionJump(15)
+                        val now = System.currentTimeMillis()
+                        if (now - lastShowToastTime2 > 5 * 1000) {
+                            ToastMgr.shortBottomCenter(context, "已快进15秒")
+                        }
+                        lastShowToastTime2 = now
+                        scope.launch {
+                            delay(500)
+                            if (!isLongPressRight && isResumed) {
+                                isLongPressRight = true
+                                startLongPressSeek(15)
                             }
                         }
-                    } else {
-                        if (keyAction == KeyEvent.ACTION_DOWN) {
-                            isLongPressRight = false
-                            fastPositionJump(15)
-                            val now = System.currentTimeMillis()
-                            if (now - lastShowToastTime2 > 5 * 1000) {
-                                ToastMgr.shortBottomCenter(context, "已快进15秒")
-                            }
-                            lastShowToastTime2 = now
-                            scope.launch {
-                                delay(500)
-                                if (!isLongPressRight && isResumed) {
-                                    isLongPressRight = true
-                                    startLongPressSeek(15)
-                                }
-                            }
-                        } else if (keyAction == KeyEvent.ACTION_UP) {
-                            isLongPressRight = false
-                            stopLongPressSeek()
-                        }
+                    } else if (keyAction == KeyEvent.ACTION_UP) {
+                        isLongPressRight = false
+                        stopLongPressSeek()
                     }
                     return true
                 }
@@ -481,19 +397,6 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
             }
         }
         return false
-    }
-
-    private fun findLiveIndex(): Int {
-        var index = -1
-        if (liveItem == null || liveItem!!.urls.isNullOrEmpty()) {
-            return index
-        }
-        liveItem!!.urls.forEachIndexed { i, s ->
-            if (s == playData?.url) {
-                index = i
-            }
-        }
-        return index
     }
 
     override fun onResume() {
@@ -624,9 +527,6 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
     }
 
     private fun play(clearSwitch: Boolean = true) {
-        if (clearSwitch) {
-            liveItem = null
-        }
         if (isControlsOverlayVisible) {
             hideControlsOverlay(false)
         }
@@ -710,50 +610,7 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
         if (settingHolder!!.isShowing()) {
             return
         }
-        settingHolder!!.show(videoView, playData?.url, liveItem, trackHolder)
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onLiveUrlChange(subChange: SubChange) {
-        try {
-            if (liveListHolder != null && liveListHolder!!.isShowing()) {
-                liveListHolder?.hide()
-            }
-            liveListHolder = null
-            LiveListHolder.liveData = ArrayList()
-            LiveListHolder.channelNamesList = ArrayList()
-            showLive()
-        } catch (e: Exception) {
-        }
-    }
-
-    fun showLive() {
-        if (liveListHolder == null) {
-            liveListHolder =
-                LiveListHolder(requireContext()) { liveItem ->
-                    if (this.liveItem != null) {
-                        LiveModel.reSortLastLiveItem(this.liveItem!!)
-                    }
-                    playData = DlanUrlDTO()
-                    playData?.apply {
-                        url = liveItem.urls[0]
-                        title = liveItem.name
-                    }
-                    this.liveItem = liveItem
-                    PreferenceMgr.put(context, "playUrl", liveItem.urls[0])
-                    PreferenceMgr.put(context, "playTitle", liveItem.name)
-                    PreferenceMgr.put(context, "playUrls", liveItem.urls.joinToString("|||"))
-                    play(false)
-                    if (isControlsOverlayVisible) {
-                        hideControlsOverlay(false)
-                    }
-                    liveListHolder?.hide()
-                }
-        }
-        if (liveListHolder!!.isShowing()) {
-            return
-        }
-        liveListHolder!!.show(videoView)
+        settingHolder!!.show(videoView, playData?.url, trackHolder)
     }
 
     companion object {

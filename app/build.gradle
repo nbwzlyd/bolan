@@ -3,7 +3,7 @@ plugins {
     id 'kotlin-android'
 }
 apply plugin: 'kotlin-kapt'
-def appName = "波澜投屏"
+def appName = "大星投屏"
 def versionCodeNew = 38
 def versionNameNew = "3.0"
 
@@ -43,8 +43,36 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        exclude '**/*.kotlin_module'
+        exclude '**/LICENSE.txt'
+        exclude '**/NOTICE.txt'
+        exclude '**/*.md'
+        exclude 'META-INF/*.kotlin_module'
+        exclude 'META-INF/*.version'
+        exclude 'META-INF/services/**'
+        exclude 'org/bouncycastle/**'
+        exclude 'org/conscrypt/**'
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+        density {
+            enableSplit = false
+        }
+        abi {
+            enableSplit = true
         }
     }
 
