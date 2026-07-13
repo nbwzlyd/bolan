@@ -2,7 +2,7 @@ package com.hd.tvpro
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import androidx.leanback.app.PlaybackVideoFragment
+import com.hd.tvpro.video.PlaybackVideoFragment
 
 /** Loads [PlaybackVideoFragment]. */
 class PlaybackActivity : FragmentActivity() {

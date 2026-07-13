@@ -1,4 +1,4 @@
-package service.model
+package com.hd.tvpro.service.model
 
 data class LiveItem(
     var name: String,

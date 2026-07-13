@@ -11,9 +11,8 @@ import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.PopupWindow
 import android.widget.TextView
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.Format
-import com.google.android.exoplayer2.util.MimeTypes
+import androidx.media3.common.C
+import androidx.media3.common.Format
 import com.hd.tvpro.R
 import com.hd.tvpro.constants.AppConfig
 import com.hd.tvpro.event.SwitchUrlChange
@@ -24,7 +23,7 @@ import com.hd.tvpro.util.ToastMgr
 import com.hd.tvpro.video.model.TrackHolder
 import com.hd.tvpro.view.SelectListView
 import org.greenrobot.eventbus.EventBus
-import service.model.LiveItem
+import com.hd.tvpro.service.model.LiveItem
 
 /**
  * 作者：By 15968
@@ -224,18 +223,16 @@ class SettingHolder constructor(
                 }
                 "音频轨道" -> {
                     var audio: String? = null
-                    val trackSelections = trackHolder?.trackSelections
-                    if (trackSelections != null) {
-                        for (i in 0 until trackSelections.length) {
-                            if (trackSelections.get(i) != null) {
-                                for (j in 0 until trackSelections.get(i)!!.length()) {
-                                    if (MimeTypes.isAudio(
-                                            trackSelections.get(i)!!.getFormat(j).sampleMimeType
-                                        )
-                                        || trackSelections.get(i)!!
-                                            .getFormat(j).channelCount != Format.NO_VALUE
+                    val tracks = trackHolder?.tracks
+                    if (tracks != null) {
+                        for (group in tracks.groups) {
+                            if (group.isSelected) {
+                                for (j in 0 until group.length) {
+                                    val format = group.getTrackFormat(j)
+                                    if (format.sampleMimeType?.startsWith("audio/") == true
+                                        || format.channelCount != Format.NO_VALUE
                                     ) {
-                                        audio = trackSelections.get(i)!!.getFormat(j).id
+                                        audio = format.id
                                     }
                                 }
                             }
@@ -250,16 +247,14 @@ class SettingHolder constructor(
                 }
                 "字幕轨道" -> {
                     var text: String? = null
-                    val trackSelections = trackHolder?.trackSelections
-                    if (trackSelections != null) {
-                        for (i in 0 until trackSelections.length) {
-                            if (trackSelections.get(i) != null) {
-                                for (j in 0 until trackSelections.get(i)!!.length()) {
-                                    if (MimeTypes.isText(
-                                            trackSelections.get(i)!!.getFormat(j).sampleMimeType
-                                        )
-                                    ) {
-                                        text = trackSelections.get(i)!!.getFormat(j).id
+                    val tracks = trackHolder?.tracks
+                    if (tracks != null) {
+                        for (group in tracks.groups) {
+                            if (group.isSelected) {
+                                for (j in 0 until group.length) {
+                                    val format = group.getTrackFormat(j)
+                                    if (format.sampleMimeType?.startsWith("text/") == true) {
+                                        text = format.id
                                     }
                                 }
                             }

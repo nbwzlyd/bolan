@@ -16,7 +16,7 @@ class ErrorFragment : androidx.leanback.app.ErrorSupportFragment() {
     }
 
     internal fun setErrorContent() {
-        imageDrawable = ContextCompat.getDrawable(requireActivity(), R.drawable.lb_ic_sad_cloud)
+        imageDrawable = ContextCompat.getDrawable(requireActivity(), android.R.drawable.ic_dialog_alert)
         message = resources.getString(R.string.error_fragment_message)
         setDefaultBackground(TRANSLUCENT)
 

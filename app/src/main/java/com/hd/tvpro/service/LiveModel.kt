@@ -1,4 +1,4 @@
-package service
+package com.hd.tvpro.service
 
 import android.content.Context
 import android.util.Log
@@ -11,8 +11,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import service.model.LiveItem
-import utils.FileUtil
+import com.hd.tvpro.service.model.LiveItem
+import com.hd.tvpro.util.FileUtil
 import java.util.concurrent.TimeUnit
 import kotlin.collections.set
 

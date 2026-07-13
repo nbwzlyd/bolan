@@ -1,15 +1,15 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     apply from: 'versions.gradle'
-    ext.kotlin_version = "1.5.31"
+    ext.kotlin_version = "1.9.25"
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/public' }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.2.2"
+        classpath "com.android.tools.build:gradle:8.12.3"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.yanzhenjie.andserver:plugin:2.1.9'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -18,23 +18,41 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'https://maven.google.com' }
-        maven{url 'https://jitpack.io'}
         google()
-        jcenter()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url 'https://dl.bintray.com/ycjiang/ycjiang' }
-        maven { url 'https://dl.bintray.com/hpdx/maven/' }
+        mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://jitpack.io' }
     }
 
     project.ext {
-        compileSdkVersion=29
-        targetSdkVersion=26
-        buildToolsVersion='29.0.0'
-        minSdkVersion=17
-        versionCode = 16
+        compileSdkVersion = 35
+        targetSdkVersion = 30
+        buildToolsVersion = '35.0.0'
+        minSdkVersion = 23
+        versionCode = 38
         versionName = "3.0"
-        publish_version='2.1.91'
+        publish_version = '2.1.91'
+    }
+}
+
+// 把标准 androidx.media3:media3-* 坐标（若有传递依赖引用）重定向到 composite build 里
+// tvbox/media3 的源模块（tvbox 的 fongmi 分支构件名为 lib-*，项目路径为 :media3:lib-*）。
+// bolan 自身的依赖已直接使用 lib-* 坐标，这里仅作为兜底，确保不会误拉 Google Maven 的上游包。
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        substitute module('androidx.media3:media3-common') using project(':media3:lib-common')
+        substitute module('androidx.media3:media3-datasource') using project(':media3:lib-datasource')
+        substitute module('androidx.media3:media3-datasource-rtmp') using project(':media3:lib-datasource-rtmp')
+        substitute module('androidx.media3:media3-datasource-cronet') using project(':media3:lib-datasource-cronet')
+        substitute module('androidx.media3:media3-exoplayer') using project(':media3:lib-exoplayer')
+        substitute module('androidx.media3:media3-exoplayer-dash') using project(':media3:lib-exoplayer-dash')
+        substitute module('androidx.media3:media3-exoplayer-hls') using project(':media3:lib-exoplayer-hls')
+        substitute module('androidx.media3:media3-exoplayer-smoothstreaming') using project(':media3:lib-exoplayer-smoothstreaming')
+        substitute module('androidx.media3:media3-exoplayer-rtsp') using project(':media3:lib-exoplayer-rtsp')
+        substitute module('androidx.media3:media3-ui') using project(':media3:lib-ui')
+        substitute module('androidx.media3:media3-session') using project(':media3:lib-session')
+        substitute module('androidx.media3:media3-decoder') using project(':media3:lib-decoder')
     }
 }
 

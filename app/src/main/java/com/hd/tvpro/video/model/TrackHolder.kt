@@ -1,8 +1,7 @@
 package com.hd.tvpro.video.model
 
-import com.google.android.exoplayer2.source.TrackGroupArray
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
+import androidx.media3.common.Tracks
+import androidx.media3.exoplayer.trackselection.MappingTrackSelector
 
 /**
  * 作者：By 15968
@@ -10,8 +9,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray
  * 时间：At 15:07
  */
 data class TrackHolder(
-    val trackGroups: TrackGroupArray?,
-    val trackSelections: TrackSelectionArray?,
+    val tracks: Tracks?,
     val trackProvider: () -> MappingTrackSelector.MappedTrackInfo?,
     val subtitle: () -> String?
 )

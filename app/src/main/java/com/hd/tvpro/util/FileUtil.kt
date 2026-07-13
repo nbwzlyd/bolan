@@ -1,4 +1,4 @@
-package utils
+package com.hd.tvpro.util
 
 import android.util.Log
 import com.hd.tvpro.app.App

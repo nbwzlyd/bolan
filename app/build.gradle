@@ -3,24 +3,26 @@ plugins {
     id 'kotlin-android'
 }
 apply plugin: 'kotlin-kapt'
-apply plugin: 'com.yanzhenjie.andserver'
 def appName = "波澜投屏"
 def versionCodeNew = 38
 def versionNameNew = "3.0"
 
 android {
-    compileSdkVersion 30
+    namespace "com.hd.tvpro"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         applicationId "com.hd.tvpro"
-        minSdkVersion 17
-        targetSdkVersion 30
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode versionCodeNew
         versionName versionNameNew
 
         multiDexEnabled true
         ndk {
-            abiFilters "armeabi-v7a"
+            abiFilters "armeabi-v7a", "arm64-v8a"
+            stl "c++_shared"
         }
     }
 
@@ -38,6 +40,14 @@ android {
             outputFileName = fileName
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
 dependencies {
@@ -47,29 +57,38 @@ dependencies {
     implementation 'androidx.leanback:leanback:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
-    //播放器
-    implementation project(':VideoPlayModule')
-    implementation project(':ffmpeg')
+    // 播放器：纯 Leanback + Media3。依赖来自 composite build 的 D:/dev/tvbox/media3（fongmi 补丁分支，1.9.2）。
+    // 注意：tvbox 的 fongmi 分支把构件坐标从标准 media3-exoplayer 改名为 lib-exoplayer（包名仍是 androidx.media3.*），
+    // 因此这里直接依赖 lib-* 坐标，由 composite build 解析到 :media3:lib-* 源模块。
+    // 不再引入 VideoUi 模块，media3-ui 由 lib-ui 提供（CaptionStyleCompat/SubtitleView/AspectRatioFrameLayout 均在其内）。
+    implementation "androidx.media3:lib-exoplayer:$media3_version"
+    implementation "androidx.media3:lib-exoplayer-dash:$media3_version"
+    implementation "androidx.media3:lib-exoplayer-hls:$media3_version"
+    implementation "androidx.media3:lib-exoplayer-smoothstreaming:$media3_version"
+    implementation "androidx.media3:lib-datasource:$media3_version"
+    implementation "androidx.media3:lib-datasource-rtmp:$media3_version"
+    implementation "androidx.media3:lib-datasource-cronet:$media3_version"
+    implementation "androidx.media3:lib-ui:$media3_version"
+    implementation "androidx.media3:lib-common:$media3_version"
     //event
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation 'com.lzy.net:okgo:3.0.4'
     //stream用法
     implementation 'com.annimon:stream:1.2.1'
-    implementation 'com.alibaba:fastjson:1.1.72.android'
+    // JSON 序列化：用 Gson 替换存在 RCE 漏洞的 fastjson 1.x
+    implementation 'com.google.code.gson:gson:2.9.0'
+    // 生命周期感知的协程作用域（lifecycleScope）
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     //全面屏、刘海屏适配
     implementation 'com.github.smarxpan:NotchScreenTool:0.0.1'
     implementation "androidx.multidex:multidex:2.0.1"
     //协程
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     //统计和crash
     implementation  'com.umeng.umsdk:common:9.4.4'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    //网页投屏
-    implementation 'com.yanzhenjie.andserver:api:2.1.9'
-    kapt 'com.yanzhenjie.andserver:processor:2.1.9'
     implementation 'com.google.zxing:core:3.3.0'
-    implementation 'javax.activation:javax.activation-api:1.2.0'
+
     //crash
     implementation 'com.github.SJJ-dot:Cockroach:2.0.1'
     implementation 'me.weishu:free_reflection:3.0.1'

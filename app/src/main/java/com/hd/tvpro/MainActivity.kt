@@ -16,16 +16,15 @@ import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
-import androidx.leanback.app.PlaybackVideoFragment
+import androidx.lifecycle.lifecycleScope
+import com.hd.tvpro.video.PlaybackVideoFragment
 import com.hd.tvpro.app.App
 import com.hd.tvpro.util.IPUtils
 import com.hd.tvpro.util.QRCodeUtil.createQRCodeBitmap
-import com.hd.tvpro.webserver.WebServer
 import com.pngcui.skyworth.dlna.service.MediaRenderService
 import com.pngcui.skyworth.dlna.util.CommonUtil
 import com.smarx.notchlib.NotchScreenManager
 import kotlinx.coroutines.*
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.math.min
 
 
@@ -41,7 +40,7 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-//        super.onConfigurationChanged(newConfig)
+        super.onConfigurationChanged(newConfig)
         Log.d(TAG, "onConfigurationChanged: ")
     }
 
@@ -63,8 +62,7 @@ class MainActivity : FragmentActivity() {
             this,
             MediaRenderService::class.java
         )
-        val scope = CoroutineScope(EmptyCoroutineContext)
-        scope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
             delay(1000)
             withContext(Dispatchers.Main) {
                 if (!isFinishing) {
@@ -74,13 +72,6 @@ class MainActivity : FragmentActivity() {
                         startService(intent)
                     }
                 }
-            }
-        }
-        if (App.webServer == null) {
-            try {
-                App.webServer = WebServer()
-                App.webServer?.start()
-            } catch (e: Exception) {
             }
         }
     }

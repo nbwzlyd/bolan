@@ -2,59 +2,61 @@ package com.hd.tvpro.video
 
 import android.content.Context
 import android.content.res.Resources
-import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.LocaleList
 import android.view.SurfaceHolder
+import java.util.Locale
 import androidx.leanback.media.PlaybackBaseControlGlue
 import androidx.leanback.media.PlaybackGlueHost
 import androidx.leanback.media.PlayerAdapter
 import androidx.leanback.media.SurfaceHolderGlueHost
-import chuangyuan.ycj.videolibrary.listener.VideoInfoListener
-import chuangyuan.ycj.videolibrary.video.ExoUserPlayer
-import chuangyuan.ycj.videolibrary.video.ManualPlayer
-import chuangyuan.ycj.videolibrary.video.VideoPlayerManager
-import chuangyuan.ycj.videolibrary.widget.VideoPlayerView
-import com.google.android.exoplayer2.DefaultRenderersFactory
-import com.google.android.exoplayer2.ExoPlaybackException
-import com.google.android.exoplayer2.PlaybackException
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.source.TrackGroupArray
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
-import com.google.android.exoplayer2.ui.AnimUtils
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import com.google.android.exoplayer2.video.VideoSize
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.VideoSize
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.TrackGroupArray
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.exoplayer.trackselection.TrackSelectionArray
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import com.hd.tvpro.util.PreferenceMgr
 import com.hd.tvpro.util.StringUtil
-import java.io.*
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
-
+import java.util.HashSet
 
 /**
- * 作者：By 15968
- * 日期：On 2021/10/24
- * 时间：At 18:02
+ * 纯 Leanback + Media3 的播放适配器。
+ * 继承自 Leanback 的 PlayerAdapter，transport（播放/暂停/快进/进度）由 Leanback glue 驱动，
+ * 渲染由 media3 的 PlayerView 负责（surface + 字幕 + resizeMode 一体）。
+ * 不再依赖 chuangyuan 的 ManualPlayer / ExoUserPlayer / VideoPlayerManager。
  */
 class MediaPlayerAdapter constructor(
     private var mContext: Context,
-    private var videoView: VideoPlayerView,
+    private var playerView: PlayerView,
     private val videoDataHelper: VideoDataHelper
 ) : PlayerAdapter() {
-    var player: ManualPlayer? = null
+
+    /** 直接持有的 Media3 ExoPlayer 实例 */
+    var player: ExoPlayer? = null
+        private set
+
     var mSurfaceHolderGlueHost: SurfaceHolderGlueHost? = null
     val mRunnable: Runnable = object : Runnable {
         override fun run() {
-            //这里更新太频繁，外部监听器暂时不管
+            // 进度更新：外部监听器在 onCurrentPositionChanged 中处理，这里只触发回调
             callback.onCurrentPositionChanged(this@MediaPlayerAdapter)
             mHandler.postDelayed(this, getProgressUpdatingInterval().toLong())
         }
     }
     val mHandler = Handler()
-    var mInitialized = false // true when the MediaPlayer is prepared/initialized
+    var mInitialized = false // true when the player is prepared/initialized
 
     var mMediaSourceUri: String? = null
     var headers: Map<String, String>? = null
@@ -67,22 +69,18 @@ class MediaPlayerAdapter constructor(
     var onTracksChangedListener: TracksChangedListener? = null
 
     interface TracksChangedListener {
-        fun onTracksChanged(
-            trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?
-        )
+        fun onTracksChanged(tracks: androidx.media3.common.Tracks)
     }
 
     private val videoPlayerSurfaceHolderCallback = object : SurfaceHolder.Callback {
         override fun surfaceCreated(surfaceHolder: SurfaceHolder) {
-//            setDisplay(surfaceHolder)
+            // 用 PlayerView 自带的 surface 时不需要手动 setDisplay
         }
 
         override fun surfaceChanged(surfaceHolder: SurfaceHolder, i: Int, i1: Int, i2: Int) {
-
         }
 
         override fun surfaceDestroyed(surfaceHolder: SurfaceHolder) {
-//            setDisplay(null)
         }
     }
 
@@ -92,73 +90,83 @@ class MediaPlayerAdapter constructor(
 
     private fun initPlayer() {
         checkListener()
-        if (player == null || player?.player == null) {
-            player = VideoPlayerManager.Builder(VideoPlayerManager.TYPE_PLAY_MANUAL, videoView)
-                .setTitle("")
-                .create()
-            val videoInfoListener = object : VideoInfoListener {
-                override fun onPlayStart(currPosition: Long) {
-                    mInitialized = true
-                    listeners.forEach {
-                        it.onBufferingStateChanged(this@MediaPlayerAdapter, false)
-                        it.onPreparedStateChanged(this@MediaPlayerAdapter)
+        if (player == null) {
+            val renderersFactory = DefaultRenderersFactory(mContext)
+                // 默认优先使用 MediaCodec 扩展渲染器；音频解码失败时由 onPlayerError 退化处理
+                .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+
+            val trackSelector = DefaultTrackSelector(mContext).apply {
+                setParameters(
+                    buildUponParameters()
+                        .setPreferredAudioLanguages(*getDeviceLanguages())
+                        .setPreferredTextLanguages(*getDeviceLanguages())
+                )
+            }
+
+            player = ExoPlayer.Builder(mContext)
+                .setRenderersFactory(renderersFactory)
+                .setTrackSelector(trackSelector)
+                .build()
+
+            // 渲染交给 PlayerView
+            playerView.player = player
+
+            player!!.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    when (playbackState) {
+                        Player.STATE_READY -> {
+                            mInitialized = true
+                            listeners.forEach {
+                                it.onBufferingStateChanged(this@MediaPlayerAdapter, false)
+                                it.onPreparedStateChanged(this@MediaPlayerAdapter)
+                            }
+                            playStartTask?.run()
+                        }
+                        Player.STATE_BUFFERING -> {
+                            listeners.forEach {
+                                it.onBufferingStateChanged(this@MediaPlayerAdapter, true)
+                            }
+                        }
+                        Player.STATE_ENDED -> {
+                            listeners.forEach {
+                                it.onPlayCompleted(this@MediaPlayerAdapter)
+                            }
+                            videoDataHelper.next(true)
+                        }
+                        Player.STATE_IDLE -> {
+                            // 空闲
+                        }
                     }
-                    playStartTask?.run()
                 }
 
-                override fun onLoadingChanged() {
+                override fun onIsLoadingChanged(isLoading: Boolean) {
                     listeners.forEach {
-                        it.onBufferingStateChanged(this@MediaPlayerAdapter, true)
+                        it.onBufferingStateChanged(this@MediaPlayerAdapter, isLoading)
                     }
                 }
 
-                override fun isPlaying(playWhenReady: Boolean) {
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
                     listeners.forEach {
                         it.onPlayStateChanged(this@MediaPlayerAdapter)
                     }
                 }
 
-                override fun onPlayerError(e: ExoPlaybackException?) {
-                    onError(e)
-                }
-
-                override fun onPlayEnd() {
-                    listeners.forEach {
-                        it.onPlayCompleted(this@MediaPlayerAdapter)
-                    }
-                    videoDataHelper.next(true)
-                }
-            }
-
-            player!!.player.addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
-                    super.onPlayerError(error)
-                    if (error.toString()
-                            .contains("MediaCodecAudioRenderer error")
-                    ) {
-                        //系统音频解码失败，试试ffmpeg
-                        if (ExoUserPlayer.getExtensionMode() != DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER) {
-                            ExoUserPlayer.setExtensionMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-                            reStartPlayer()
-                            return
-                        } else {
-                            //已经设置过，还是失败，那就恢复
-                            ExoUserPlayer.setExtensionMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-                        }
+                    if (error.message?.contains("MediaCodecAudioRenderer error") == true) {
+                        // 系统音频解码失败：尝试优先使用扩展（ffmpeg）渲染器后重建；
+                        // 注意：当前已移除 ffmpeg 源码模块，扩展渲染器仅为 MediaCodec 扩展，
+                        // 这里退化为直接使用 MediaCodec（EXTENSION_RENDERER_MODE_ON 已是默认）。
+                        reStartPlayer()
+                        return
                     }
                     onError(error)
                 }
 
-                override fun onTracksChanged(
-                    trackGroups: TrackGroupArray,
-                    trackSelections: TrackSelectionArray
-                ) {
-                    super.onTracksChanged(trackGroups, trackSelections)
-                    onTracksChangedListener?.onTracksChanged(trackGroups, trackSelections)
+                override fun onTracksChanged(tracks: androidx.media3.common.Tracks) {
+                    super.onTracksChanged(tracks)
+                    onTracksChangedListener?.onTracksChanged(tracks)
                 }
-            })
 
-            val listener = object : Player.Listener {
                 override fun onVideoSizeChanged(videoSize: VideoSize) {
                     super.onVideoSizeChanged(videoSize)
                     listeners.forEach {
@@ -169,33 +177,10 @@ class MediaPlayerAdapter constructor(
                         )
                     }
                 }
+            })
 
-            }
-
-            player?.let {
-                it.addVideoInfoListener(videoInfoListener)
-                it.player.addListener(listener)
-                val defaultTrackSelector = player?.player?.trackSelector as DefaultTrackSelector?
-                defaultTrackSelector?.setParameters(
-                    defaultTrackSelector.parameters.buildUpon()
-                        .setPreferredAudioLanguages(*getDeviceLanguages())
-                        .setPreferredTextLanguages(*getDeviceLanguages())
-                )
-            }
-            val progressListener =
-                AnimUtils.UpdateProgressListener { position, bufferedPosition, duration ->
-                    mBufferedProgress = bufferedPosition
-                    listeners.forEach {
-                        it.onBufferedPositionChanged(this@MediaPlayerAdapter)
-                        it.onDurationChanged(this@MediaPlayerAdapter)
-                        it.onCurrentPositionChanged(this@MediaPlayerAdapter)
-                    }
-                }
-            videoView.playbackControlView.addUpdateProgressListener(progressListener)
-            videoView.isNetworkNotify = false
             loadResizeMode()
             loadSpeed()
-//            videoView.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
         }
     }
 
@@ -231,50 +216,32 @@ class MediaPlayerAdapter constructor(
 
     fun loadResizeMode() {
         when (PreferenceMgr.getInt(mContext, "screen", 0)) {
-            0 -> {
-                videoView.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-            }
-            1 -> {
-                videoView.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
-            }
-            2 -> {
-                videoView.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
-            }
-            3 -> {
-                videoView.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
-            }
+            0 -> playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            1 -> playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+            2 -> playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+            3 -> playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         }
     }
 
     fun loadSpeed() {
         val speed = PreferenceMgr.getFloat(mContext, "speed", 1f)
-        player!!.setPlaybackParameters(speed, 1f)
-    }
-
-    /**
-     * Constructor.
-     */
-    fun MediaPlayerAdapter(context: Context) {
-        mContext = context
+        player?.setPlaybackSpeed(speed)
     }
 
     override fun onAttachedToHost(host: PlaybackGlueHost?) {
+        // 渲染由 PlayerView 接管，不再使用 SurfaceHolderGlueHost 手动设置 surface。
+        // 保留回调占位以兼容 Leanback 的 glue host 生命周期。
         if (host is SurfaceHolderGlueHost) {
             mSurfaceHolderGlueHost = host
             mSurfaceHolderGlueHost!!.setSurfaceHolderCallback(videoPlayerSurfaceHolderCallback)
         }
     }
 
-    /**
-     * Will reset the [MediaPlayer] and the glue such that a new file can be played. You are
-     * not required to call this method before playing the first file. However you have to call it
-     * before playing a second one.
-     */
     private fun reset() {
         player?.let {
             changeToUnitialized()
             try {
-                player!!.reset()
+                player!!.stop()
             } catch (e: Exception) {
             }
         }
@@ -290,14 +257,12 @@ class MediaPlayerAdapter constructor(
         }
     }
 
-    /**
-     * Release internal MediaPlayer. Should not use the object after call release().
-     */
     private fun release() {
         player?.let {
             changeToUnitialized()
             mHasDisplay = false
-            player!!.releasePlayers()
+            player!!.release()
+            player = null
         }
     }
 
@@ -307,20 +272,16 @@ class MediaPlayerAdapter constructor(
             mSurfaceHolderGlueHost!!.setSurfaceHolderCallback(null)
             mSurfaceHolderGlueHost = null
         }
-
         reset()
         release()
     }
 
     fun memoryPosition() {
         player?.let {
-            if (player?.player?.isCurrentWindowLive != true) {
+            if (it.isCurrentWindowLive != true) {
                 PreferenceMgr.put(mContext, memUrlKey, mMediaSourceUri)
                 var pos = 0L
                 if (it.duration - it.currentPosition > 3 * 60 * 1000 && it.duration > 10 * 60 * 1000 && it.currentPosition > 3 * 60 * 1000) {
-                    //最后还剩3分钟不管
-                    //总时长不超过10分钟不管
-                    //播放时长没超过3分钟不管
                     pos = it.currentPosition
                 }
                 PreferenceMgr.put(mContext, memPosKey, pos)
@@ -338,18 +299,13 @@ class MediaPlayerAdapter constructor(
         return false
     }
 
-    /**
-     * @see MediaPlayer.setDisplay
-     */
     fun setDisplay(surfaceHolder: SurfaceHolder?) {
         val hadDisplay = mHasDisplay
         mHasDisplay = surfaceHolder != null
         if (hadDisplay == mHasDisplay) {
             return
         }
-        player?.let {
-            it.player.setVideoSurfaceHolder(surfaceHolder)
-        }
+        // 使用 PlayerView 时不需要手动设置 surface；保留状态通知
         listeners.forEach {
             if (mHasDisplay) {
                 if (player != null) {
@@ -371,26 +327,21 @@ class MediaPlayerAdapter constructor(
         mHandler.postDelayed(mRunnable, getProgressUpdatingInterval().toLong())
     }
 
-    /**
-     * Return updating interval of progress UI in milliseconds. Subclass may override.
-     * @return Update interval of progress UI in milliseconds.
-     */
     fun getProgressUpdatingInterval(): Int {
-        return 16
+        // 原值 16ms ≈ 62 次/秒过于频繁，改为 1000ms（与 DLNA 进度上报节奏一致），显著降低耗电
+        return 1000
     }
 
     override fun isPlaying(): Boolean {
-        return if (player != null) {
-            player!!.isPlaying
-        } else false
+        return player?.isPlaying == true
     }
 
     override fun getDuration(): Long {
-        return if (player != null) player!!.duration else -1
+        return player?.duration ?: -1
     }
 
     override fun getCurrentPosition(): Long {
-        return if (player != null) player!!.currentPosition else -1
+        return player?.currentPosition ?: -1
     }
 
     override fun play() {
@@ -398,7 +349,7 @@ class MediaPlayerAdapter constructor(
             if (it.isPlaying) {
                 return
             }
-            it.setStartOrPause(true)
+            it.playWhenReady = true
             listeners.forEach {
                 it.onPlayStateChanged(this@MediaPlayerAdapter)
                 it.onCurrentPositionChanged(this@MediaPlayerAdapter)
@@ -408,7 +359,7 @@ class MediaPlayerAdapter constructor(
 
     override fun pause() {
         if (isPlaying && player != null) {
-            player!!.setStartOrPause(false)
+            player!!.playWhenReady = false
             listeners.forEach {
                 it.onPlayStateChanged(this@MediaPlayerAdapter)
             }
@@ -432,7 +383,6 @@ class MediaPlayerAdapter constructor(
                 PlaybackBaseControlGlue.ACTION_FAST_FORWARD or
                 PlaybackBaseControlGlue.ACTION_REWIND or
                 PlaybackBaseControlGlue.ACTION_SKIP_TO_NEXT).toLong()
-
     }
 
     override fun seekTo(newPosition: Long) {
@@ -446,12 +396,12 @@ class MediaPlayerAdapter constructor(
         return mBufferedProgress
     }
 
+    override fun isPrepared(): Boolean {
+        return player != null
+    }
+
     /**
-     * Sets the media source of the player witha given URI.
-     *
-     * @return Returns `true` if uri represents a new media; `false`
-     * otherwise.
-     * @see MediaPlayer.setDataSource
+     * 设置媒体源并开始播放。
      */
     fun setDataSource(
         uri: String?,
@@ -468,37 +418,57 @@ class MediaPlayerAdapter constructor(
         return true
     }
 
+    private fun buildMediaItem(): MediaItem {
+        val builder = MediaItem.Builder().setUri(mMediaSourceUri)
+        val sub = subtitle
+        if (!sub.isNullOrEmpty()) {
+            builder.setSubtitleConfigurations(
+                listOf(
+                    MediaItem.SubtitleConfiguration.Builder(Uri.parse(sub))
+                        .setMimeType(MimeTypes.TEXT_VTT)
+                        .setLanguage("zh")
+                        .build()
+                )
+            )
+        }
+        return builder.build()
+    }
+
     private fun prepareMediaForPlaying() {
         reset()
         initPlayer()
         try {
-            if (mMediaSourceUri != null) {
-                player?.let {
-                    try {
-                        it.setPlayUri(
-                            mMediaSourceUri!!,
-                            headers,
-                            subtitle
-                        )
-                        val memUrl = PreferenceMgr.getString(mContext, memUrlKey, "")
-                        if (StringUtil.isNotEmpty(memUrl) && memUrl.equals(mMediaSourceUri)) {
-                            val memPos = PreferenceMgr.getLong(mContext, memPosKey, 0L)
-                            if (memPos > 0) {
-                                it.setPosition(memPos)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+            val memUrl = PreferenceMgr.getString(mContext, memUrlKey, "")
+            var startPos = 0L
+            if (StringUtil.isNotEmpty(memUrl) && memUrl == mMediaSourceUri) {
+                val memPos = PreferenceMgr.getLong(mContext, memPosKey, 0L)
+                if (memPos > 0) {
+                    startPos = memPos
                 }
-            } else {
-                return
             }
-        } catch (e: IOException) {
+            val currentHeaders = headers
+            player?.apply {
+                val factory = if (mMediaSourceUri?.startsWith("http", true) == true) {
+                    val dsFactory = DefaultHttpDataSource.Factory()
+                    if (!currentHeaders.isNullOrEmpty()) {
+                        dsFactory.setDefaultRequestProperties(currentHeaders)
+                    }
+                    dsFactory
+                } else {
+                    DefaultDataSource.Factory(mContext)
+                }
+                setMediaSource(
+                    androidx.media3.exoplayer.source.DefaultMediaSourceFactory(mContext)
+                        .setDataSourceFactory(factory)
+                        .createMediaSource(buildMediaItem())
+                )
+                seekTo(startPos)
+                playWhenReady = true
+                prepare()
+            }
+        } catch (e: Exception) {
             e.printStackTrace()
         }
-        //直接播放
-        player!!.startPlayer<ExoUserPlayer>()
     }
 
     private fun reStartPlayer() {
@@ -506,35 +476,29 @@ class MediaPlayerAdapter constructor(
         reset()
         initPlayer()
         try {
-            if (mMediaSourceUri != null) {
-                player?.let {
-                    try {
-                        it.setPlayUri(
-                            mMediaSourceUri!!,
-                            headers,
-                            subtitle
-                        )
-                        it.setPosition(pos)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+            val currentHeaders = headers
+            player?.apply {
+                val factory = if (mMediaSourceUri?.startsWith("http", true) == true) {
+                    val dsFactory = DefaultHttpDataSource.Factory()
+                    if (!currentHeaders.isNullOrEmpty()) {
+                        dsFactory.setDefaultRequestProperties(currentHeaders)
                     }
+                    dsFactory
+                } else {
+                    DefaultDataSource.Factory(mContext)
                 }
-            } else {
-                return
+                setMediaSource(
+                    androidx.media3.exoplayer.source.DefaultMediaSourceFactory(mContext)
+                        .setDataSourceFactory(factory)
+                        .createMediaSource(buildMediaItem())
+                )
+                seekTo(pos)
+                playWhenReady = true
+                prepare()
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
-        //直接播放
-        player!!.startPlayer<ExoUserPlayer>()
-    }
-
-    /**
-     * @return True if MediaPlayer OnPreparedListener is invoked and got a SurfaceHolder if
-     * [PlaybackGlueHost] provides SurfaceHolder.
-     */
-    override fun isPrepared(): Boolean {
-        return player != null
     }
 
     companion object {

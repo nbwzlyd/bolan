@@ -7,7 +7,7 @@ import android.util.DisplayMetrics
 import android.view.*
 import android.widget.AdapterView
 import android.widget.PopupWindow
-import com.alibaba.fastjson.JSON
+import com.google.gson.Gson
 import com.hd.tvpro.R
 import com.hd.tvpro.app.App
 import com.hd.tvpro.constants.AppConfig
@@ -17,9 +17,9 @@ import com.hd.tvpro.view.ChannelListView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import service.LiveModel
-import service.model.LiveItem
-import utils.FileUtil
+import com.hd.tvpro.service.LiveModel
+import com.hd.tvpro.service.model.LiveItem
+import com.hd.tvpro.util.FileUtil
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
@@ -321,7 +321,7 @@ class LiveListHolder constructor(
     private fun loadFinish(list: ArrayList<LiveItem>) {
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                if (!JSON.toJSONString(list).equals(JSON.toJSONString(liveData))) {
+                if (Gson().toJson(list) != Gson().toJson(liveData)) {
                     liveData.clear()
                     liveData.addAll(list)
                     groupNamesList.clear()
