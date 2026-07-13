@@ -17,3 +17,16 @@ local.properties
 # Project exclude paths
 /VideoUi/build/
 /VideoUi/build/intermediates/javac/debug/classes/
+
+# Build and debug logs
+*.log
+*.txt
+
+# Backup directories
+/platinum-src-backup/
+
+# Migration scripts
+media3_migrate.py
+
+# Build artifacts
+app/src/main/jni/build-arm64/

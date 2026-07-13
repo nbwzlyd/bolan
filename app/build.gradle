@@ -23,6 +23,21 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a"
             stl "c++_shared"
+            version "27.0.12077973"
+        }
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared", "-DANDROID_PLATFORM=android-23", "-DCMAKE_BUILD_TYPE=Release"
+                cFlags "-fPIC"
+                cppFlags "-fPIC"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('src/main/jni/CMakeLists.txt')
+            version '3.22.1'
         }
     }
 
@@ -84,13 +99,7 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
     //协程
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    //统计和crash
-    implementation  'com.umeng.umsdk:common:9.4.4'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.zxing:core:3.3.0'
-
-    //crash
-    implementation 'com.github.SJJ-dot:Cockroach:2.0.1'
-    implementation 'me.weishu:free_reflection:3.0.1'
     implementation 'com.jakewharton.timber:timber:4.7.1'
 }
