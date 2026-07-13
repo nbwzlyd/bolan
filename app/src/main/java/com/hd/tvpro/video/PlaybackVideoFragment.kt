@@ -44,6 +44,7 @@ import com.hd.tvpro.event.SubChange
 import com.hd.tvpro.event.SwitchUrlChange
 import com.hd.tvpro.setting.LiveListHolder
 import com.hd.tvpro.setting.SettingHolder
+import com.hd.tvpro.setting.CastRecordHolder
 import com.hd.tvpro.util.*
 import com.hd.tvpro.util.http.HttpListener
 import com.hd.tvpro.util.http.HttpUtils
@@ -55,6 +56,7 @@ import com.hd.tvpro.video.model.TrackHolder
 import com.hd.tvpro.service.LiveModel
 import com.hd.tvpro.service.model.LiveItem
 import com.hd.tvpro.util.FileUtil
+import com.hd.tvpro.util.CastRecordMgr
 import com.pngcui.skyworth.dlna.center.DLNAGenaEventBrocastFactory
 import com.pngcui.skyworth.dlna.center.DlnaMediaModel
 import com.pngcui.skyworth.dlna.center.MediaControlBrocastFactory
@@ -88,6 +90,10 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
     private var webDlanData: DlanUrlDTO? = null
 
     private var trackHolder: TrackHolder? = null
+    private var isLongPressLeft = false
+    private var isLongPressRight = false
+    private var longPressJob: Job? = null
+    private var castRecordHolder: CastRecordHolder? = null
 
     fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         return false
@@ -102,6 +108,13 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
     }
 
     fun onBackPressed(): Boolean {
+        if (castRecordHolder != null && castRecordHolder!!.isShowing()) {
+            if (isControlsOverlayVisible) {
+                hideControlsOverlay(false)
+            }
+            castRecordHolder!!.hide()
+            return true
+        }
         if (settingHolder != null && settingHolder!!.isShowing()) {
             if (isControlsOverlayVisible) {
                 hideControlsOverlay(false)
@@ -132,9 +145,6 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
         playerAdapter = MediaPlayerAdapter(requireActivity(), videoView, videoDataHelper)
 
         playerAdapter.playStartTask = Runnable {
-            if (activity is MainActivity) {
-                (activity as MainActivity).hideHelpDialog()
-            }
             if (liveItem != null && !liveItem!!.urls.isNullOrEmpty() && playerAdapter.player?.isCurrentWindowLive == true) {
                 playerAdapter.mMediaSourceUri?.let {
                     LiveModel.addGoodUrl(requireContext(), liveItem!!.name, it)
@@ -204,14 +214,7 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
         val parent = view.parent as ViewGroup
         parent.addView(videoView, 0)
 
-        if (activity is MainActivity) {
-            scope.launch(Dispatchers.Main) {
-                delay(2000)
-                if (StringUtil.isEmpty(mTransportControlGlue.title) && !playerAdapter.isPlaying) {
-                    (activity as MainActivity).showHelpDialog()
-                }
-            }
-        }
+
 
 
         val subtitleView: SubtitleView? = videoView.subtitleView
@@ -394,43 +397,79 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
                     }
                 }
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
-                    if (keyAction == KeyEvent.ACTION_DOWN) {
-                        val liveIndex = findLiveIndex()
-                        if (playerAdapter.player?.isCurrentWindowLive == true
-                            || liveIndex >= 0
-                        ) {
+                    val liveIndex = findLiveIndex()
+                    val isLive = playerAdapter.player?.isCurrentWindowLive == true || liveIndex >= 0
+                    if (!isLive && !isSeekable()) {
+                        if (keyAction == KeyEvent.ACTION_DOWN) {
+                            ToastMgr.shortBottomCenter(context, "该视频不支持快进")
+                        }
+                        return true
+                    }
+                    if (isLive) {
+                        if (keyAction == KeyEvent.ACTION_DOWN) {
                             if (liveIndex > 0) {
                                 onSwitch(SwitchUrlChange(liveItem!!.urls[liveIndex - 1]))
                                 ToastMgr.shortBottomCenter(context, "已切换线路${liveIndex}")
                             }
-                        } else {
+                        }
+                    } else {
+                        if (keyAction == KeyEvent.ACTION_DOWN) {
+                            isLongPressLeft = false
                             fastPositionJump(-15)
                             val now = System.currentTimeMillis()
                             if (now - lastShowToastTime1 > 5 * 1000) {
                                 ToastMgr.shortBottomCenter(context, "已快退15秒")
                             }
                             lastShowToastTime1 = now
+                            scope.launch {
+                                delay(500)
+                                if (!isLongPressLeft && isResumed) {
+                                    isLongPressLeft = true
+                                    startLongPressSeek(-15)
+                                }
+                            }
+                        } else if (keyAction == KeyEvent.ACTION_UP) {
+                            isLongPressLeft = false
+                            stopLongPressSeek()
                         }
                     }
                     return true
                 }
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    if (keyAction == KeyEvent.ACTION_DOWN) {
-                        val liveIndex = findLiveIndex()
-                        if (playerAdapter.player?.isCurrentWindowLive == true
-                            || liveIndex >= 0
-                        ) {
+                    val liveIndex = findLiveIndex()
+                    val isLive = playerAdapter.player?.isCurrentWindowLive == true || liveIndex >= 0
+                    if (!isLive && !isSeekable()) {
+                        if (keyAction == KeyEvent.ACTION_DOWN) {
+                            ToastMgr.shortBottomCenter(context, "该视频不支持快进")
+                        }
+                        return true
+                    }
+                    if (isLive) {
+                        if (keyAction == KeyEvent.ACTION_DOWN) {
                             if (liveIndex >= 0 && liveIndex < liveItem!!.urls.size - 1) {
                                 onSwitch(SwitchUrlChange(liveItem!!.urls[liveIndex + 1]))
                                 ToastMgr.shortBottomCenter(context, "已切换线路${liveIndex + 2}")
                             }
-                        } else {
+                        }
+                    } else {
+                        if (keyAction == KeyEvent.ACTION_DOWN) {
+                            isLongPressRight = false
                             fastPositionJump(15)
                             val now = System.currentTimeMillis()
                             if (now - lastShowToastTime2 > 5 * 1000) {
                                 ToastMgr.shortBottomCenter(context, "已快进15秒")
                             }
                             lastShowToastTime2 = now
+                            scope.launch {
+                                delay(500)
+                                if (!isLongPressRight && isResumed) {
+                                    isLongPressRight = true
+                                    startLongPressSeek(15)
+                                }
+                            }
+                        } else if (keyAction == KeyEvent.ACTION_UP) {
+                            isLongPressRight = false
+                            stopLongPressSeek()
                         }
                     }
                     return true
@@ -480,6 +519,33 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
             }
         }
         playerAdapter.seekTo(newPos)
+    }
+
+    private fun isSeekable(): Boolean {
+        return try {
+            playerAdapter.duration > 0 && playerAdapter.player?.isCurrentWindowSeekable == true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun startLongPressSeek(stepSeconds: Long) {
+        longPressJob?.cancel()
+        longPressJob = scope.launch {
+            while (isLongPressLeft || isLongPressRight) {
+                delay(200)
+                if (isResumed && isSeekable()) {
+                    withContext(Dispatchers.Main) {
+                        fastPositionJump(stepSeconds)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun stopLongPressSeek() {
+        longPressJob?.cancel()
+        longPressJob = null
     }
 
     private val videoDataHelper = object : VideoDataHelper {
@@ -564,8 +630,9 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
         if (isControlsOverlayVisible) {
             hideControlsOverlay(false)
         }
-        if (activity is MainActivity) {
-            (activity as MainActivity).hideHelpDialog()
+        playData?.let {
+            val title = if (it.title.isNullOrEmpty() || it.title == it.url) FileUtil.getFileName(it.url) else it.title
+            CastRecordMgr.addRecord(requireContext(), title, it.url)
         }
         playData?.let {
             val t =
@@ -617,7 +684,26 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
                             SettingHolder.Option.FINISH -> {
                                 activity?.finish()
                             }
+
+                            SettingHolder.Option.CAST_RECORD -> {
+                                showCastRecords()
+                            }
                         }
+                    }
+
+                    override fun showCastRecords() {
+                        if (castRecordHolder == null) {
+                            castRecordHolder = CastRecordHolder(requireContext()) { record ->
+                                playData = DlanUrlDTO()
+                                playData?.apply {
+                                    url = record.url
+                                    title = record.title
+                                }
+                                play(true)
+                            }
+                        }
+                        settingHolder?.hide()
+                        castRecordHolder?.show(videoView)
                     }
                 })
         }

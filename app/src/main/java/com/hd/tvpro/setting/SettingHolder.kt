@@ -48,11 +48,12 @@ class SettingHolder constructor(
     private var subtitleFormatMap = HashMap<Int, Format>()
 
     enum class Option {
-        SCREEN, SPEED, RESET, FINISH
+        SCREEN, SPEED, RESET, FINISH, CAST_RECORD
     }
 
     interface SettingUpdateListener {
         fun update(option: Option)
+        fun showCastRecords() {}
     }
 
     private fun setSettingText(
@@ -166,6 +167,11 @@ class SettingHolder constructor(
             startOption.mRightList.add("关闭")
             startOption.mRightList.add("开启")
             settingArrayList.add(startOption)
+
+            val recordOption = SettingOption("投屏记录")
+            recordOption.mRightList.add("查看记录")
+            recordOption.mRightList.add("清空记录")
+            settingArrayList.add(recordOption)
 
             val aboutOption = SettingOption("关于软件")
             aboutOption.mRightList.add("新版下载地址")
@@ -295,6 +301,14 @@ class SettingHolder constructor(
                             context,
                             "已" + (if (posval == 1) "开启" else "关闭") + "开机自启动"
                         )
+                    }
+                    "投屏记录" -> {
+                        if (posval == 0) {
+                            settingUpdateListener.showCastRecords()
+                        } else {
+                            com.hd.tvpro.util.CastRecordMgr.clearRecords(context)
+                            ToastMgr.shortBottomCenter(context, "投屏记录已清空")
+                        }
                     }
                     "线路切换" -> {
                         val url = liveItem!!.urls[posval]

@@ -69,7 +69,7 @@ public class MediaRenderService extends Service implements IBaseEngine {
             Notification notification = new NotificationCompat.Builder(App.INSTANCE, channelId)
                     .setContentTitle(getResources().getString(R.string.app_name))
                     .setContentText("DLAN投屏")
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setSmallIcon(R.mipmap.ic_launcher)
                     .build();
             startForeground(ONGOING_NOTIFICATION_ID, notification);
         }

@@ -19,8 +19,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.hd.tvpro.video.PlaybackVideoFragment
 import com.hd.tvpro.app.App
-import com.hd.tvpro.util.IPUtils
-import com.hd.tvpro.util.QRCodeUtil.createQRCodeBitmap
 import com.pngcui.skyworth.dlna.service.MediaRenderService
 import com.pngcui.skyworth.dlna.util.CommonUtil
 import com.smarx.notchlib.NotchScreenManager
@@ -155,7 +153,6 @@ class MainActivity : FragmentActivity() {
 
     //显示退出对话框
     fun showExitDialog() {
-        hideHelpDialog()
         val fontSize = CommonUtil.getScreenWidth(this) / 42
         val inflater = layoutInflater
         val exitView: View = inflater.inflate(R.layout.layout_exit_dialog, null)
@@ -165,7 +162,7 @@ class MainActivity : FragmentActivity() {
         val qrcodeView = exitView.findViewById<View>(R.id.qrcodeView) as ImageView
 
         val qrParams: ViewGroup.LayoutParams = qrcodeView.layoutParams
-        qrParams.height = min(CommonUtil.getScreenWidth(this), CommonUtil.getScreenHeight(this)) / 4
+        qrParams.height = min(CommonUtil.getScreenWidth(this), CommonUtil.getScreenHeight(this)) / 3
         qrParams.width = qrParams.height
         qrcodeView.layoutParams = qrParams
 
@@ -178,13 +175,12 @@ class MainActivity : FragmentActivity() {
         tv_isp.text = "确认退出软件？"
         tv_isp.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize.toFloat())
         val tv_webadmin = exitView.findViewById<View>(R.id.tv_webadmin) as TextView
-        val ip = IPUtils.getIP(getContext())
-        val url = "http://$ip:12345"
-        tv_webadmin.text = ("远程管理地址：\n$url")
-        val mBitmap: Bitmap? = createQRCodeBitmap(url, 480, 480)
-        qrcodeView.setImageBitmap(mBitmap)
-
+        tv_webadmin.visibility = View.VISIBLE
+        tv_webadmin.text = "扫码关注安卓哥开发，不迷路"
         tv_webadmin.setTextSize(TypedValue.COMPLEX_UNIT_PX, (fontSize * 8 / 10).toFloat())
+        tv_webadmin.gravity = android.view.Gravity.CENTER
+        qrcodeView.setImageResource(R.drawable.exit_qrcode)
+
         btn_exit.text = "退出"
         btn_exit.setOnClickListener {
             finish()
