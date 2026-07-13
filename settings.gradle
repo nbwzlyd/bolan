@@ -1,3 +1,8 @@
 rootProject.name = "波澜投屏"
+
+// 用 composite build 引入本地 tvbox/media3（fongmi 补丁分支，1.9.2）。
+// 这样 bolan 直接吃 tvbox 的源码模块，而非 Google Maven 上的上游包，保证用到补丁。
+gradle.ext.androidxMediaModulePrefix = ''
+includeBuild 'D:/dev/tvbox/media3'
+
 include ':app'
-include ':VideoPlayModule-Lite', ':VideoUi', ':VideoPlayModule', ':ffmpeg'

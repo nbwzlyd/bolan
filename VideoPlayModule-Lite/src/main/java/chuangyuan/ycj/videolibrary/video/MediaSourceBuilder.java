@@ -7,15 +7,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.ClippingMediaSource;
-import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
-import com.google.android.exoplayer2.source.LoopingMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.MediaSourceEventListener;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.upstream.DataSource;
+import androidx.media3.common.C;
+import androidx.media3.extractor.DefaultExtractorsFactory;
+import androidx.media3.exoplayer.source.ClippingMediaSource;
+import androidx.media3.exoplayer.source.ConcatenatingMediaSource;
+import androidx.media3.exoplayer.source.LoopingMediaSource;
+import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.exoplayer.source.MediaSourceEventListener;
+import androidx.media3.exoplayer.source.ProgressiveMediaSource;
+import androidx.media3.datasource.DataSource;
 
 import java.util.List;
 import java.util.Map;

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
-import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
+import static androidx.media3.common.util.Assertions.checkNotNull;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -25,12 +25,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.SelectionOverride;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
-import com.google.android.exoplayer2.trackselection.TrackSelectionUtil;
+import androidx.media3.common.Format;
+import androidx.media3.common.TrackGroupArray;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.SelectionOverride;
+import androidx.media3.exoplayer.trackselection.MappingTrackSelector.MappedTrackInfo;
+import androidx.media3.exoplayer.trackselection.TrackSelectionUtil;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Comparator;

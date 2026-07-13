@@ -15,7 +15,7 @@
  */
 package com.google.android.exoplayer2.ext.ffmpeg;
 
-import com.google.android.exoplayer2.decoder.DecoderException;
+import androidx.media3.decoder.DecoderException;
 
 /**
  * Thrown when an FFmpeg decoder error occurs.

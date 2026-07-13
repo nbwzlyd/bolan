@@ -4,24 +4,24 @@ import android.net.Uri;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.extractor.Extractor;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.extractor.amr.AmrExtractor;
-import com.google.android.exoplayer2.extractor.flac.FlacExtractor;
-import com.google.android.exoplayer2.extractor.flv.FlvExtractor;
-import com.google.android.exoplayer2.extractor.jpeg.JpegExtractor;
-import com.google.android.exoplayer2.extractor.mkv.MatroskaExtractor;
-import com.google.android.exoplayer2.extractor.mp3.Mp3Extractor;
-import com.google.android.exoplayer2.extractor.mp4.FragmentedMp4Extractor;
-import com.google.android.exoplayer2.extractor.mp4.Mp4Extractor;
-import com.google.android.exoplayer2.extractor.ogg.OggExtractor;
-import com.google.android.exoplayer2.extractor.ts.Ac3Extractor;
-import com.google.android.exoplayer2.extractor.ts.Ac4Extractor;
-import com.google.android.exoplayer2.extractor.ts.AdtsExtractor;
-import com.google.android.exoplayer2.extractor.ts.PsExtractor;
-import com.google.android.exoplayer2.extractor.ts.TsExtractor;
-import com.google.android.exoplayer2.extractor.wav.WavExtractor;
-import com.google.android.exoplayer2.util.FileTypes;
+import androidx.media3.extractor.Extractor;
+import androidx.media3.extractor.ExtractorsFactory;
+import androidx.media3.extractor.amr.AmrExtractor;
+import androidx.media3.extractor.flac.FlacExtractor;
+import androidx.media3.extractor.flv.FlvExtractor;
+import androidx.media3.extractor.jpeg.JpegExtractor;
+import androidx.media3.extractor.mkv.MatroskaExtractor;
+import androidx.media3.extractor.mp3.Mp3Extractor;
+import androidx.media3.extractor.mp4.FragmentedMp4Extractor;
+import androidx.media3.extractor.mp4.Mp4Extractor;
+import androidx.media3.extractor.ogg.OggExtractor;
+import androidx.media3.extractor.ts.Ac3Extractor;
+import androidx.media3.extractor.ts.Ac4Extractor;
+import androidx.media3.extractor.ts.AdtsExtractor;
+import androidx.media3.extractor.ts.PsExtractor;
+import androidx.media3.extractor.ts.TsExtractor;
+import androidx.media3.extractor.wav.WavExtractor;
+import androidx.media3.common.util.FileTypes;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -204,9 +204,9 @@ public final class MyDefaultExtractorsFactory implements ExtractorsFactory {
         Constructor flacExtensionExtractorConstructor = null;
 
         try {
-            boolean isFlacNativeLibraryAvailable = Boolean.TRUE.equals(Class.forName("com.google.android.exoplayer2.ext.flac.FlacLibrary").getMethod("isAvailable").invoke((Object)null));
+            boolean isFlacNativeLibraryAvailable = Boolean.TRUE.equals(Class.forName("androidx.media3.extractor.flac.FlacLibrary").getMethod("isAvailable").invoke((Object)null));
             if (isFlacNativeLibraryAvailable) {
-                flacExtensionExtractorConstructor = Class.forName("com.google.android.exoplayer2.ext.flac.FlacExtractor").asSubclass(Extractor.class).getConstructor(Integer.TYPE);
+                flacExtensionExtractorConstructor = Class.forName("androidx.media3.extractor.flac.FlacExtractor").asSubclass(Extractor.class).getConstructor(Integer.TYPE);
             }
         } catch (ClassNotFoundException var2) {
         } catch (Exception var3) {

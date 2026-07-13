@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 android {
+    namespace "chuangyuan.ycj.videolibrary"
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
@@ -32,6 +33,10 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
     api project(':VideoUi')
+    // Media3 核心（chuangyuan 封装层直接引用 Player / ExoPlayer / Format 等类型）
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-common:$media3_version"
+    implementation "androidx.media3:media3-datasource:$media3_version"
     implementation 'androidx.annotation:annotation:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha04'
     implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'

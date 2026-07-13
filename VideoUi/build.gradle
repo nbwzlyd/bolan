@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 android {
+    namespace "androidx.media3.ui"
     compileSdkVersion  project.ext.compileSdkVersion
     buildToolsVersion project.ext.buildToolsVersion
 
@@ -31,11 +32,11 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    api('com.google.android.exoplayer:exoplayer-core:2.15.1', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude group: 'com.android.support', module: 'support-compat'
-        exclude group: 'com.android.support', module: 'support-core-utils'
-    })
+    // 本模块自带 ExoPlayer UI 源码（重映射后为 androidx.media3.ui.*），因此只依赖 media3 核心，
+    // 切勿再引入 media3-ui AAR，否则会与本模块提供的 androidx.media3.ui.* 产生重复类冲突。
+    api "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-common:$media3_version"
+    implementation "androidx.media3:media3-datasource:$media3_version"
     implementation 'androidx.media:media:1.4.3@aar'
     implementation 'androidx.annotation:annotation:1.2.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'

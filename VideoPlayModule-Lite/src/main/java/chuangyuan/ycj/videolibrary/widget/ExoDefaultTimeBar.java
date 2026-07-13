@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.exoplayer2.ui.DefaultTimeBar;
+import androidx.media3.ui.DefaultTimeBar;
 
 /**
  * The type Exo default time bar.

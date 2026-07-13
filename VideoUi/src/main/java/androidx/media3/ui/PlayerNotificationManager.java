@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -36,14 +36,14 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.media.app.NotificationCompat.MediaStyle;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ControlDispatcher;
-import com.google.android.exoplayer2.DefaultControlDispatcher;
-import com.google.android.exoplayer2.ForwardingPlayer;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.util.NotificationUtil;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.ControlDispatcher;
+import androidx.media3.exoplayer.DefaultControlDispatcher;
+import androidx.media3.exoplayer.ForwardingPlayer;
+import androidx.media3.exoplayer.Player;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.common.util.NotificationUtil;
+import androidx.media3.common.util.Util;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -55,21 +55,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_BACK;
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_FORWARD;
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_TO_NEXT;
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_TO_PREVIOUS;
-import static com.google.android.exoplayer2.Player.EVENT_IS_PLAYING_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_MEDIA_METADATA_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_PLAYBACK_PARAMETERS_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_PLAYBACK_STATE_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_PLAY_WHEN_READY_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_POSITION_DISCONTINUITY;
-import static com.google.android.exoplayer2.Player.EVENT_REPEAT_MODE_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_TIMELINE_CHANGED;
-import static com.google.android.exoplayer2.util.Assertions.checkArgument;
-import static com.google.android.exoplayer2.util.Assertions.checkState;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_BACK;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_FORWARD;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_TO_NEXT;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_TO_PREVIOUS;
+import static androidx.media3.exoplayer.Player.EVENT_IS_PLAYING_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_MEDIA_METADATA_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_PLAYBACK_PARAMETERS_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_PLAYBACK_STATE_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_PLAY_WHEN_READY_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_POSITION_DISCONTINUITY;
+import static androidx.media3.exoplayer.Player.EVENT_REPEAT_MODE_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_TIMELINE_CHANGED;
+import static androidx.media3.common.util.Assertions.checkArgument;
+import static androidx.media3.common.util.Assertions.checkState;
 
 /**
  * Starts, updates and cancels a media style notification reflecting the player state. The actions
@@ -822,7 +822,7 @@ public class PlayerNotificationManager {
   /**
    * @deprecated Use a {@link ForwardingPlayer} and pass it to {@link #setPlayer(Player)} instead.
    *     You can also customize some operations when configuring the player (for example by using
-   *     {@link SimpleExoPlayer.Builder#setSeekBackIncrementMs(long)}), or configure whether the
+   *     {@link ExoPlayer.Builder#setSeekBackIncrementMs(long)}), or configure whether the
    *     rewind and fast forward actions should be used with {{@link #setUseRewindAction(boolean)}}
    *     and {@link #setUseFastForwardAction(boolean)}.
    */

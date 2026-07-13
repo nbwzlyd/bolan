@@ -20,9 +20,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatCheckBox;
 
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.ui.AnimUtils;
-import com.google.android.exoplayer2.ui.PlayerControlView;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.AnimUtils;
+import androidx.media3.ui.PlayerControlView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -658,7 +658,7 @@ public final class VideoPlayerView extends BaseView {
         }
 
         @Override
-        public void setPlayer(@NonNull SimpleExoPlayer player) {
+        public void setPlayer(@NonNull ExoPlayer player) {
             playerView.setPlayer(player);
         }
 

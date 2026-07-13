@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace "chuangyuan.ycj.videolibrary.whole"
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
@@ -39,29 +40,15 @@ dependencies {
     })
     testImplementation 'junit:junit:4.12'
     api project(':VideoPlayModule-Lite')
-    implementation('com.google.android.exoplayer:exoplayer-smoothstreaming:2.15.1', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    implementation('com.google.android.exoplayer:exoplayer-dash:2.15.1', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude group: 'com.android.support', module: 'support-compat'
-        exclude group: 'com.android.support', module: 'support-core-utils'
-    })
-    implementation('com.google.android.exoplayer:exoplayer-hls:2.15.1', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude group: 'com.android.support', module: 'support-compat'
-        exclude group: 'com.android.support', module: 'support-core-utils'
-    })
-    //2.16.1会导致rtmp播放闪退
-    implementation('com.google.android.exoplayer:extension-rtmp:2.15.1', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude group: 'com.android.support', module: 'support-compat'
-        exclude group: 'com.android.support', module: 'support-core-utils'
-    })
-    implementation ('com.google.android.exoplayer:extension-cronet:2.15.1', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude group: 'com.android.support', module: 'support-compat'
-        exclude group: 'com.android.support', module: 'support-core-utils'
-    })
+    // ExoPlayer 2.15.1 -> AndroidX Media3 (1.10.1)
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-smoothstreaming:$media3_version"
+    // rtmp 在 Media3 中由 media3-datasource-rtmp 提供（原 extension-rtmp 已迁移）
+    implementation "androidx.media3:media3-datasource-rtmp:$media3_version"
+    implementation "androidx.media3:media3-datasource-cronet:$media3_version"
+    implementation "androidx.media3:media3-common:$media3_version"
+    implementation "androidx.media3:media3-datasource:$media3_version"
     implementation 'androidx.annotation:annotation:1.2.0'
 }

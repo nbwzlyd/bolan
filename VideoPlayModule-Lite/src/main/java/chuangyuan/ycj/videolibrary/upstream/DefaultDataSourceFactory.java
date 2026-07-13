@@ -18,15 +18,15 @@ package chuangyuan.ycj.videolibrary.upstream;
 import android.content.Context;
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSource.Factory;
-import com.google.android.exoplayer2.upstream.DefaultDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.TransferListener;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DataSource.Factory;
+import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.datasource.TransferListener;
 
 /**
- * A {@link Factory} that produces {@link com.google.android.exoplayer2.upstream.DefaultDataSource} instances that delegate to {@link
- * com.google.android.exoplayer2.upstream.DefaultHttpDataSource}s for non-file/asset/content URIs.
+ * A {@link Factory} that produces {@link androidx.media3.datasource.DefaultDataSource} instances that delegate to {@link
+ * androidx.media3.datasource.DefaultHttpDataSource}s for non-file/asset/content URIs.
  */
 public final class DefaultDataSourceFactory implements Factory {
 
@@ -72,8 +72,8 @@ public final class DefaultDataSourceFactory implements Factory {
    *
    * @param context A context.
    * @param baseDataSourceFactory A {@link Factory} to be used to create a base {@link DataSource}
-   *     for {@link com.google.android.exoplayer2.upstream.DefaultDataSource}.
-   * @see com.google.android.exoplayer2.upstream.DefaultDataSource#DefaultDataSource(Context, DataSource)
+   *     for {@link androidx.media3.datasource.DefaultDataSource}.
+   * @see androidx.media3.datasource.DefaultDataSource#DefaultDataSource(Context, DataSource)
    */
   public DefaultDataSourceFactory(Context context, Factory baseDataSourceFactory) {
     this(context, /* listener= */ null, baseDataSourceFactory);
@@ -85,8 +85,8 @@ public final class DefaultDataSourceFactory implements Factory {
    * @param context A context.
    * @param listener An optional listener.
    * @param baseDataSourceFactory A {@link Factory} to be used to create a base {@link DataSource}
-   *     for {@link com.google.android.exoplayer2.upstream.DefaultDataSource}.
-   * @see com.google.android.exoplayer2.upstream.DefaultDataSource#DefaultDataSource(Context, DataSource)
+   *     for {@link androidx.media3.datasource.DefaultDataSource}.
+   * @see androidx.media3.datasource.DefaultDataSource#DefaultDataSource(Context, DataSource)
    */
   public DefaultDataSourceFactory(
       Context context,
@@ -98,8 +98,8 @@ public final class DefaultDataSourceFactory implements Factory {
   }
 
   @Override
-  public com.google.android.exoplayer2.upstream.DefaultDataSource createDataSource() {
-    com.google.android.exoplayer2.upstream.DefaultDataSource dataSource =
+  public androidx.media3.datasource.DefaultDataSource createDataSource() {
+    androidx.media3.datasource.DefaultDataSource dataSource =
         new DefaultDataSource(context, baseDataSourceFactory.createDataSource());
     if (listener != null) {
       dataSource.addTransferListener(listener);

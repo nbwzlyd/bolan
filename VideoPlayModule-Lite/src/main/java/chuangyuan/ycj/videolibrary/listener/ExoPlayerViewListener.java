@@ -5,7 +5,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.exoplayer2.SimpleExoPlayer;
+import androidx.media3.exoplayer.ExoPlayer;
 
 import java.util.List;
 
@@ -186,7 +186,7 @@ public interface ExoPlayerViewListener {
      * 设置播放播放控制类
      * @param player 实例
      */
-    void setPlayer(@NonNull SimpleExoPlayer player);
+    void setPlayer(@NonNull ExoPlayer player);
 
     /***
      * 加载布局是否显示

@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
-import com.google.android.exoplayer2.ui.AnimUtils;
+import androidx.media3.ui.AnimUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

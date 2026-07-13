@@ -17,10 +17,10 @@ package com.google.android.exoplayer2.ext.ffmpeg;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
-import com.google.android.exoplayer2.util.LibraryLoader;
-import com.google.android.exoplayer2.util.Log;
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.ExoPlayerLibraryInfo;
+import androidx.media3.common.util.LibraryLoader;
+import androidx.media3.common.util.Log;
 
 /** Configures and queries the underlying native library. */
 public final class FfmpegLibrary {

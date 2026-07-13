@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatCheckBox;
 
-import com.google.android.exoplayer2.ui.AnimUtils;
+import androidx.media3.ui.AnimUtils;
 
 import chuangyuan.ycj.videolibrary.R;
 import chuangyuan.ycj.videolibrary.utils.VideoPlayUtils;

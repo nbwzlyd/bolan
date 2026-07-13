@@ -1,4 +1,4 @@
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.view.View;
 

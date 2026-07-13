@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -22,11 +22,11 @@ import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.RelativeSizeSpan;
 
-import com.google.android.exoplayer2.text.Cue;
-import com.google.android.exoplayer2.text.span.LanguageFeatureSpan;
+import androidx.media3.exoplayer.text.Cue;
+import androidx.media3.exoplayer.text.span.LanguageFeatureSpan;
 import com.google.common.base.Predicate;
 
-import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
+import static androidx.media3.common.util.Assertions.checkNotNull;
 
 /** Utility class for subtitle layout logic. */
 /* package */ final class SubtitleViewUtils {

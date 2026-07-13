@@ -17,12 +17,12 @@ package chuangyuan.ycj.videolibrary.upstream;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.HttpDataSource;
-import com.google.android.exoplayer2.upstream.HttpDataSource.BaseFactory;
-import com.google.android.exoplayer2.upstream.TransferListener;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.datasource.HttpDataSource;
+import androidx.media3.datasource.HttpDataSource.BaseFactory;
+import androidx.media3.datasource.TransferListener;
 
-/** @deprecated Use {@link com.google.android.exoplayer2.upstream.DefaultHttpDataSource.Factory} instead. */
+/** @deprecated Use {@link androidx.media3.datasource.DefaultHttpDataSource.Factory} instead. */
 @Deprecated
 public final class DefaultHttpDataSourceFactory extends BaseFactory {
 
@@ -33,8 +33,8 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
   private final boolean allowCrossProtocolRedirects;
 
   /**
-   * Creates an instance. Sets {@link com.google.android.exoplayer2.upstream.DefaultHttpDataSource#DEFAULT_CONNECT_TIMEOUT_MILLIS} as the
-   * connection timeout, {@link com.google.android.exoplayer2.upstream.DefaultHttpDataSource#DEFAULT_READ_TIMEOUT_MILLIS} as the read
+   * Creates an instance. Sets {@link androidx.media3.datasource.DefaultHttpDataSource#DEFAULT_CONNECT_TIMEOUT_MILLIS} as the
+   * connection timeout, {@link androidx.media3.datasource.DefaultHttpDataSource#DEFAULT_READ_TIMEOUT_MILLIS} as the read
    * timeout and disables cross-protocol redirects.
    */
   public DefaultHttpDataSourceFactory() {
@@ -42,8 +42,8 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
   }
 
   /**
-   * Creates an instance. Sets {@link com.google.android.exoplayer2.upstream.DefaultHttpDataSource#DEFAULT_CONNECT_TIMEOUT_MILLIS} as the
-   * connection timeout, {@link com.google.android.exoplayer2.upstream.DefaultHttpDataSource#DEFAULT_READ_TIMEOUT_MILLIS} as the read
+   * Creates an instance. Sets {@link androidx.media3.datasource.DefaultHttpDataSource#DEFAULT_CONNECT_TIMEOUT_MILLIS} as the
+   * connection timeout, {@link androidx.media3.datasource.DefaultHttpDataSource#DEFAULT_READ_TIMEOUT_MILLIS} as the read
    * timeout and disables cross-protocol redirects.
    *
    * @param userAgent The user agent that will be used, or {@code null} to use the default user
@@ -54,8 +54,8 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
   }
 
   /**
-   * Creates an instance. Sets {@link com.google.android.exoplayer2.upstream.DefaultHttpDataSource#DEFAULT_CONNECT_TIMEOUT_MILLIS} as the
-   * connection timeout, {@link com.google.android.exoplayer2.upstream.DefaultHttpDataSource#DEFAULT_READ_TIMEOUT_MILLIS} as the read
+   * Creates an instance. Sets {@link androidx.media3.datasource.DefaultHttpDataSource#DEFAULT_CONNECT_TIMEOUT_MILLIS} as the
+   * connection timeout, {@link androidx.media3.datasource.DefaultHttpDataSource#DEFAULT_READ_TIMEOUT_MILLIS} as the read
    * timeout and disables cross-protocol redirects.
    *
    * @param userAgent The user agent that will be used, or {@code null} to use the default user
@@ -68,8 +68,8 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
     this(
         userAgent,
         listener,
-        com.google.android.exoplayer2.upstream.DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-        com.google.android.exoplayer2.upstream.DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+        androidx.media3.datasource.DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+        androidx.media3.datasource.DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
         false);
   }
 
@@ -123,9 +123,9 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
   // Calls deprecated constructor.
   @SuppressWarnings("deprecation")
   @Override
-  protected com.google.android.exoplayer2.upstream.DefaultHttpDataSource createDataSourceInternal(
+  protected androidx.media3.datasource.DefaultHttpDataSource createDataSourceInternal(
       HttpDataSource.RequestProperties defaultRequestProperties) {
-    com.google.android.exoplayer2.upstream.DefaultHttpDataSource dataSource =
+    androidx.media3.datasource.DefaultHttpDataSource dataSource =
         new DefaultHttpDataSource(
             userAgent,
             connectTimeoutMillis,

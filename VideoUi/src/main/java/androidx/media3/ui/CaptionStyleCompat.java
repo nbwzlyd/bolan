@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -23,7 +23,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.util.Util;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

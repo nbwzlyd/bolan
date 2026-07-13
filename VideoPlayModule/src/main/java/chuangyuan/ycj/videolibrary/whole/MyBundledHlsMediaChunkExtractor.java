@@ -2,21 +2,21 @@ package chuangyuan.ycj.videolibrary.whole;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.extractor.Extractor;
-import com.google.android.exoplayer2.extractor.ExtractorInput;
-import com.google.android.exoplayer2.extractor.ExtractorOutput;
-import com.google.android.exoplayer2.extractor.PositionHolder;
-import com.google.android.exoplayer2.extractor.mp3.Mp3Extractor;
-import com.google.android.exoplayer2.extractor.mp4.FragmentedMp4Extractor;
-import com.google.android.exoplayer2.extractor.ts.Ac3Extractor;
-import com.google.android.exoplayer2.extractor.ts.Ac4Extractor;
-import com.google.android.exoplayer2.extractor.ts.AdtsExtractor;
-import com.google.android.exoplayer2.extractor.ts.TsExtractor;
-import com.google.android.exoplayer2.source.hls.HlsMediaChunkExtractor;
-import com.google.android.exoplayer2.source.hls.WebvttExtractor;
-import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.TimestampAdjuster;
+import androidx.media3.common.Format;
+import androidx.media3.extractor.Extractor;
+import androidx.media3.extractor.ExtractorInput;
+import androidx.media3.extractor.ExtractorOutput;
+import androidx.media3.extractor.PositionHolder;
+import androidx.media3.extractor.mp3.Mp3Extractor;
+import androidx.media3.extractor.mp4.FragmentedMp4Extractor;
+import androidx.media3.extractor.ts.Ac3Extractor;
+import androidx.media3.extractor.ts.Ac4Extractor;
+import androidx.media3.extractor.ts.AdtsExtractor;
+import androidx.media3.extractor.ts.TsExtractor;
+import androidx.media3.exoplayer.source.hls.HlsMediaChunkExtractor;
+import androidx.media3.exoplayer.source.hls.WebvttExtractor;
+import androidx.media3.common.util.Assertions;
+import androidx.media3.common.util.TimestampAdjuster;
 
 import java.io.IOException;
 
@@ -50,7 +50,7 @@ public class MyBundledHlsMediaChunkExtractor implements HlsMediaChunkExtractor {
             return this.extractor.read(extractorInput, POSITION_HOLDER) == Extractor.RESULT_CONTINUE;
         } catch (IOException e) {
             e.printStackTrace();
-            if(e instanceof com.google.android.exoplayer2.ParserException){
+            if(e instanceof androidx.media3.exoplayer.ParserException){
                 return false;
             }
             throw e;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -22,8 +22,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.app.NotificationCompat;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.offline.Download;
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.offline.Download;
 import java.util.List;
 
 /** Helper for creating download notifications. */

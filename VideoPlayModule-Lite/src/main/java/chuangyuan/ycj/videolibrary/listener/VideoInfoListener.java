@@ -2,7 +2,7 @@ package chuangyuan.ycj.videolibrary.listener;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.ExoPlaybackException;
+import androidx.media3.exoplayer.ExoPlaybackException;
 
 /**
  * The interface Video info listener.

@@ -14,6 +14,7 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace "com.google.android.exoplayer2.ext.ffmpeg"
     compileSdkVersion project.ext.compileSdkVersion
     buildToolsVersion project.ext.buildToolsVersion
 
@@ -35,6 +36,10 @@ android {
 
 dependencies {
     implementation project(':VideoPlayModule-Lite')
+    // 注意：本模块 Java 源码包名保持 com.google.android.exoplayer2.ext.ffmpeg 不变，
+    // 因为其 JNI 原生符号（libffmpeg.so 等）是按该包名生成的；只把 import 的
+    // ExoPlayer 类型重映射为 androidx.media3.*。原生 .so 需按 Media3 的 ffmpeg JNI 重新编译。
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation 'androidx.annotation:annotation:1.2.0'
 }
 

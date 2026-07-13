@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.graphics.Typeface;
 import android.text.Html;
@@ -29,12 +29,12 @@ import android.text.style.TypefaceSpan;
 import android.text.style.UnderlineSpan;
 import android.util.SparseArray;
 import androidx.annotation.Nullable;
-import com.google.android.exoplayer2.text.span.HorizontalTextInVerticalContextSpan;
-import com.google.android.exoplayer2.text.span.RubySpan;
-import com.google.android.exoplayer2.text.span.TextAnnotation;
-import com.google.android.exoplayer2.text.span.TextEmphasisSpan;
-import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.exoplayer.text.span.HorizontalTextInVerticalContextSpan;
+import androidx.media3.exoplayer.text.span.RubySpan;
+import androidx.media3.exoplayer.text.span.TextAnnotation;
+import androidx.media3.exoplayer.text.span.TextEmphasisSpan;
+import androidx.media3.common.util.Assertions;
+import androidx.media3.common.util.Util;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
  * href="https://developer.android.com/guide/topics/text/spans">span-styled text</a> to HTML.
  *
  * <p>Supports all of the spans used by ExoPlayer's subtitle decoders, including custom ones found
- * in {@link com.google.android.exoplayer2.text.span}.
+ * in {@link androidx.media3.exoplayer.text.span}.
  */
 /* package */ final class SpannedToHtmlConverter {
 

@@ -2,10 +2,10 @@ package chuangyuan.ycj.videolibrary.factory;
 
 import android.content.Context;
 
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.DefaultDataSourceFactory;
+import androidx.media3.common.util.Util;
 
 
 /**

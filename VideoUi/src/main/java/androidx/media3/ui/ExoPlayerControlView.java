@@ -1,4 +1,4 @@
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.core.view.ViewPropertyAnimatorListener;
 
-import com.google.android.exoplayer2.C;
+import androidx.media3.common.C;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 

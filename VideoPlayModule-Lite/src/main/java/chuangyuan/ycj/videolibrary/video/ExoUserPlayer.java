@@ -21,19 +21,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
-import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.DefaultRenderersFactory;
+import androidx.media3.exoplayer.ExoPlaybackException;
+import androidx.media3.common.Format;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.PlaybackParameters;
+import androidx.media3.exoplayer.Player;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.common.Timeline;
+import androidx.media3.exoplayer.source.ConcatenatingMediaSource;
+import androidx.media3.common.TrackGroupArray;
+import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
+import androidx.media3.common.util.Util;
 
 import java.lang.reflect.Constructor;
 import java.text.DecimalFormat;
@@ -112,7 +112,7 @@ public class ExoUserPlayer {
     /*** 播放view交互接口 ***/
     private ExoPlayerViewListener mPlayerViewListener;
     /*** 内核播放控制*/
-    SimpleExoPlayer player;
+    ExoPlayer player;
     /***数据源管理类*/
     private MediaSourceBuilder mediaSourceBuilder;
     /*** 设置播放参数***/
@@ -350,11 +350,11 @@ public class ExoUserPlayer {
     /***
      * 创建实例播放实例，并不开始缓冲
      **/
-    public SimpleExoPlayer createFullPlayer() {
+    public ExoPlayer createFullPlayer() {
         setDefaultLoadModel();
 //        DefaultRenderersFactory rf = new MyDefaultRenderersFactory(activity, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON);
         DefaultRenderersFactory rf = new DefaultRenderersFactory(activity, EXTENSION_MODE);
-        SimpleExoPlayer player = new SimpleExoPlayer.Builder(activity, rf).build();
+        ExoPlayer player = new ExoPlayer.Builder(activity, rf).build();
         getPlayerViewListener().setPlayer(player);
         return player;
     }
@@ -805,9 +805,9 @@ public class ExoUserPlayer {
 
     /***
      * 获取内核播放实例
-     * @return SimpleExoPlayer player
+     * @return ExoPlayer player
      */
-    public SimpleExoPlayer getPlayer() {
+    public ExoPlayer getPlayer() {
         return player;
     }
 
@@ -1220,7 +1220,7 @@ public class ExoUserPlayer {
                     && getDuration() > 90000
                     && mediaSourceBuilder != null
                     && mediaSourceBuilder.getMediaSource() != null
-                    && "com.google.android.exoplayer2.source.hls.HlsMediaSource".equals(mediaSourceBuilder.getMediaSource().getClass().getName())) {
+                    && "androidx.media3.exoplayer.source.hls.HlsMediaSource".equals(mediaSourceBuilder.getMediaSource().getClass().getName())) {
                 Log.e(TAG, "onPlayerError: " + mediaSourceBuilder.getMediaSource().getClass());
                 if (getCurrentPosition() < 90000) {
                     setPosition(getCurrentPosition() + 10000);

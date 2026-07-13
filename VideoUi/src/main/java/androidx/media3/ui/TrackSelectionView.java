@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -25,15 +25,15 @@ import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 import androidx.annotation.AttrRes;
 import androidx.annotation.Nullable;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.RendererCapabilities;
-import com.google.android.exoplayer2.source.TrackGroup;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.SelectionOverride;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
-import com.google.android.exoplayer2.util.Assertions;
+import androidx.media3.common.C;
+import androidx.media3.common.Format;
+import androidx.media3.exoplayer.RendererCapabilities;
+import androidx.media3.common.TrackGroup;
+import androidx.media3.common.TrackGroupArray;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.SelectionOverride;
+import androidx.media3.exoplayer.trackselection.MappingTrackSelector.MappedTrackInfo;
+import androidx.media3.common.util.Assertions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;

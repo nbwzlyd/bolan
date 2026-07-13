@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.graphics.Color;
 import androidx.annotation.ColorInt;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.util.Util;
 
 /**
  * Utility methods for generating HTML and CSS for use with {@link WebViewSubtitleOutput} and {@link

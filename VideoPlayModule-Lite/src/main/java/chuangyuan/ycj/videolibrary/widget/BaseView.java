@@ -33,10 +33,10 @@ import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.ui.ExoPlayerControlView;
-import com.google.android.exoplayer2.ui.ExoPlayerView;
-import com.google.android.exoplayer2.ui.TimeBar;
+import androidx.media3.exoplayer.Player;
+import androidx.media3.ui.ExoPlayerControlView;
+import androidx.media3.ui.ExoPlayerView;
+import androidx.media3.ui.TimeBar;
 
 import java.io.File;
 import java.io.FileInputStream;

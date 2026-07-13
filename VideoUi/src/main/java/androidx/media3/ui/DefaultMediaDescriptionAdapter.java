@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.app.PendingIntent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import androidx.annotation.Nullable;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback;
-import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter;
+import androidx.media3.exoplayer.Player;
+import androidx.media3.ui.PlayerNotificationManager.BitmapCallback;
+import androidx.media3.ui.PlayerNotificationManager.MediaDescriptionAdapter;
 
 /**
  * Default implementation of {@link MediaDescriptionAdapter}.

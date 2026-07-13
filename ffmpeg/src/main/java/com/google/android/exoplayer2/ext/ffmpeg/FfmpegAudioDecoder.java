@@ -17,14 +17,14 @@ package com.google.android.exoplayer2.ext.ffmpeg;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.decoder.DecoderInputBuffer;
-import com.google.android.exoplayer2.decoder.SimpleDecoder;
-import com.google.android.exoplayer2.decoder.SimpleOutputBuffer;
-import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.ParsableByteArray;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.C;
+import androidx.media3.common.Format;
+import androidx.media3.decoder.DecoderInputBuffer;
+import androidx.media3.decoder.SimpleDecoder;
+import androidx.media3.decoder.SimpleOutputBuffer;
+import androidx.media3.common.util.Assertions;
+import androidx.media3.common.util.ParsableByteArray;
+import androidx.media3.common.util.Util;
 
 import java.nio.ByteBuffer;
 import java.util.List;

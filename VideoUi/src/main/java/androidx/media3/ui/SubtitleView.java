@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -30,9 +30,9 @@ import androidx.annotation.Dimension;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.text.Cue;
-import com.google.android.exoplayer2.text.TextOutput;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.exoplayer.text.Cue;
+import androidx.media3.exoplayer.text.TextOutput;
+import androidx.media3.common.util.Util;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

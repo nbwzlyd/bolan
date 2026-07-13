@@ -17,10 +17,10 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.source.BehindLiveWindowException;
-import com.google.android.exoplayer2.util.Assertions;
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.ExoPlaybackException;
+import androidx.media3.exoplayer.source.BehindLiveWindowException;
+import androidx.media3.common.util.Assertions;
 
 
 /**

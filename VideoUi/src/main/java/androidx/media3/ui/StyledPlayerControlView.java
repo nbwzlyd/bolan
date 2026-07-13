@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -39,30 +39,30 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ControlDispatcher;
-import com.google.android.exoplayer2.DefaultControlDispatcher;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.ForwardingPlayer;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.Player.Events;
-import com.google.android.exoplayer2.Player.State;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.source.TrackGroup;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.ParametersBuilder;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.SelectionOverride;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.RepeatModeUtil;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.ControlDispatcher;
+import androidx.media3.exoplayer.DefaultControlDispatcher;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.ExoPlayerLibraryInfo;
+import androidx.media3.common.Format;
+import androidx.media3.exoplayer.ForwardingPlayer;
+import androidx.media3.exoplayer.Player;
+import androidx.media3.exoplayer.Player.Events;
+import androidx.media3.exoplayer.Player.State;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.common.Timeline;
+import androidx.media3.common.TrackGroup;
+import androidx.media3.common.TrackGroupArray;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.ParametersBuilder;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.SelectionOverride;
+import androidx.media3.exoplayer.trackselection.MappingTrackSelector.MappedTrackInfo;
+import androidx.media3.exoplayer.trackselection.TrackSelection;
+import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
+import androidx.media3.exoplayer.trackselection.TrackSelector;
+import androidx.media3.common.util.Assertions;
+import androidx.media3.common.util.RepeatModeUtil;
+import androidx.media3.common.util.Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,23 +72,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_BACK;
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_FORWARD;
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_IN_CURRENT_WINDOW;
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_TO_NEXT;
-import static com.google.android.exoplayer2.Player.COMMAND_SEEK_TO_PREVIOUS;
-import static com.google.android.exoplayer2.Player.EVENT_IS_PLAYING_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_PLAYBACK_PARAMETERS_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_PLAYBACK_STATE_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_PLAY_WHEN_READY_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_POSITION_DISCONTINUITY;
-import static com.google.android.exoplayer2.Player.EVENT_REPEAT_MODE_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_SEEK_BACK_INCREMENT_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_SEEK_FORWARD_INCREMENT_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_TIMELINE_CHANGED;
-import static com.google.android.exoplayer2.Player.EVENT_TRACKS_CHANGED;
-import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_BACK;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_FORWARD;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_IN_CURRENT_WINDOW;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_TO_NEXT;
+import static androidx.media3.exoplayer.Player.COMMAND_SEEK_TO_PREVIOUS;
+import static androidx.media3.exoplayer.Player.EVENT_IS_PLAYING_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_PLAYBACK_PARAMETERS_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_PLAYBACK_STATE_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_PLAY_WHEN_READY_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_POSITION_DISCONTINUITY;
+import static androidx.media3.exoplayer.Player.EVENT_REPEAT_MODE_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_SEEK_BACK_INCREMENT_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_SEEK_FORWARD_INCREMENT_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_TIMELINE_CHANGED;
+import static androidx.media3.exoplayer.Player.EVENT_TRACKS_CHANGED;
+import static androidx.media3.common.util.Assertions.checkNotNull;
 
 /**
  * A view for controlling {@link Player} instances.
@@ -839,7 +839,7 @@ public class StyledPlayerControlView extends FrameLayout {
   /**
    * @deprecated Use a {@link ForwardingPlayer} and pass it to {@link #setPlayer(Player)} instead.
    *     You can also customize some operations when configuring the player (for example by using
-   *     {@link SimpleExoPlayer.Builder#setSeekBackIncrementMs(long)}).
+   *     {@link ExoPlayer.Builder#setSeekBackIncrementMs(long)}).
    */
   @Deprecated
   public void setControlDispatcher(ControlDispatcher controlDispatcher) {

@@ -2,8 +2,8 @@ package chuangyuan.ycj.videolibrary.factory;
 
 import android.content.Context;
 
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.common.util.Util;
 
 import java.util.HashMap;
 import java.util.Map;

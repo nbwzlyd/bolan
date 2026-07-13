@@ -10,7 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.ui.PlayerView;
+import androidx.media3.ui.PlayerView;
 
 import chuangyuan.ycj.videolibrary.R;
 

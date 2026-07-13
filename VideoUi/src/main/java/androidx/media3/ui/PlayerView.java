@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.exoplayer2.ui;
+package androidx.media3.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -43,28 +43,28 @@ import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ControlDispatcher;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.ForwardingPlayer;
-import com.google.android.exoplayer2.MediaMetadata;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.Player.DiscontinuityReason;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.Timeline.Period;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.text.Cue;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.ResizeMode;
-import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.ErrorMessageProvider;
-import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.exoplayer2.util.RepeatModeUtil;
-import com.google.android.exoplayer2.util.Util;
-import com.google.android.exoplayer2.video.VideoSize;
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.ControlDispatcher;
+import androidx.media3.common.Format;
+import androidx.media3.exoplayer.ForwardingPlayer;
+import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.exoplayer.Player;
+import androidx.media3.exoplayer.Player.DiscontinuityReason;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.common.Timeline;
+import androidx.media3.common.Timeline.Period;
+import androidx.media3.common.TrackGroupArray;
+import androidx.media3.exoplayer.text.Cue;
+import androidx.media3.exoplayer.trackselection.TrackSelection;
+import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
+import androidx.media3.ui.AspectRatioFrameLayout.ResizeMode;
+import androidx.media3.common.util.Assertions;
+import androidx.media3.common.util.ErrorMessageProvider;
+import androidx.media3.common.util.MimeTypes;
+import androidx.media3.common.util.RepeatModeUtil;
+import androidx.media3.common.util.Util;
+import androidx.media3.common.VideoSize;
 import com.google.common.collect.ImmutableList;
 
 import java.lang.annotation.Documented;
@@ -73,8 +73,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.android.exoplayer2.Player.COMMAND_GET_TEXT;
-import static com.google.android.exoplayer2.Player.COMMAND_SET_VIDEO_SURFACE;
+import static androidx.media3.exoplayer.Player.COMMAND_GET_TEXT;
+import static androidx.media3.exoplayer.Player.COMMAND_SET_VIDEO_SURFACE;
 
 /**
  * A high level view for {@link Player} media playbacks. It displays video, subtitles and album art
@@ -441,7 +441,7 @@ public class PlayerView extends FrameLayout implements AdViewProvider {
           try {
             Class<?> clazz =
                 Class.forName(
-                    "com.google.android.exoplayer2.video.spherical.SphericalGLSurfaceView");
+                    "androidx.media3.exoplayer.video.spherical.SphericalGLSurfaceView");
             surfaceView = (View) clazz.getConstructor(Context.class).newInstance(context);
           } catch (Exception e) {
             throw new IllegalStateException(
@@ -452,7 +452,7 @@ public class PlayerView extends FrameLayout implements AdViewProvider {
         case SURFACE_TYPE_VIDEO_DECODER_GL_SURFACE_VIEW:
           try {
             Class<?> clazz =
-                Class.forName("com.google.android.exoplayer2.video.VideoDecoderGLSurfaceView");
+                Class.forName("androidx.media3.exoplayer.video.VideoDecoderGLSurfaceView");
             surfaceView = (View) clazz.getConstructor(Context.class).newInstance(context);
           } catch (Exception e) {
             throw new IllegalStateException(
@@ -949,7 +949,7 @@ public class PlayerView extends FrameLayout implements AdViewProvider {
   /**
    * @deprecated Use a {@link ForwardingPlayer} and pass it to {@link #setPlayer(Player)} instead.
    *     You can also customize some operations when configuring the player (for example by using
-   *     {@link SimpleExoPlayer.Builder#setSeekBackIncrementMs(long)}).
+   *     {@link ExoPlayer.Builder#setSeekBackIncrementMs(long)}).
    */
   @Deprecated
   public void setControlDispatcher(ControlDispatcher controlDispatcher) {

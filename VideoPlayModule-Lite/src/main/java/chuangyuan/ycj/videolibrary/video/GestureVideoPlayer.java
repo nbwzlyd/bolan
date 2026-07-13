@@ -20,8 +20,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.PlaybackParameters;
+import androidx.media3.common.util.Util;
 
 import java.lang.ref.WeakReference;
 import java.util.Formatter;

@@ -8,7 +8,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.util.Util;
 
 import java.util.WeakHashMap;
 

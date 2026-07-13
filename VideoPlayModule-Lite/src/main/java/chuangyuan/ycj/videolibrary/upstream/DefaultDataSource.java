@@ -21,19 +21,19 @@ import android.net.Uri;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.upstream.AssetDataSource;
-import com.google.android.exoplayer2.upstream.ContentDataSource;
-import com.google.android.exoplayer2.upstream.DataSchemeDataSource;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.FileDataSource;
-import com.google.android.exoplayer2.upstream.RawResourceDataSource;
-import com.google.android.exoplayer2.upstream.TransferListener;
-import com.google.android.exoplayer2.upstream.UdpDataSource;
-import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.Log;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.datasource.AssetDataSource;
+import androidx.media3.datasource.ContentDataSource;
+import androidx.media3.datasource.DataSchemeDataSource;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.datasource.FileDataSource;
+import androidx.media3.datasource.RawResourceDataSource;
+import androidx.media3.datasource.TransferListener;
+import androidx.media3.datasource.UdpDataSource;
+import androidx.media3.common.util.Assertions;
+import androidx.media3.common.util.Log;
+import androidx.media3.common.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,8 +102,8 @@ public final class DefaultDataSource implements DataSource {
     this(
         context,
         /* userAgent= */ null,
-        com.google.android.exoplayer2.upstream.DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-        com.google.android.exoplayer2.upstream.DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+        androidx.media3.datasource.DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+        androidx.media3.datasource.DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
         allowCrossProtocolRedirects);
   }
 
@@ -121,8 +121,8 @@ public final class DefaultDataSource implements DataSource {
     this(
         context,
         userAgent,
-        com.google.android.exoplayer2.upstream.DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-        com.google.android.exoplayer2.upstream.DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+        androidx.media3.datasource.DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+        androidx.media3.datasource.DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
         allowCrossProtocolRedirects);
   }
 
@@ -276,7 +276,7 @@ public final class DefaultDataSource implements DataSource {
   private DataSource getRtmpDataSource() {
     if (rtmpDataSource == null) {
       try {
-        Class<?> clazz = Class.forName("com.google.android.exoplayer2.ext.rtmp.RtmpDataSource");
+        Class<?> clazz = Class.forName("androidx.media3.datasource.rtmp.RtmpDataSource");
         rtmpDataSource = (DataSource) clazz.getConstructor().newInstance();
         addListenersToDataSource(rtmpDataSource);
       } catch (ClassNotFoundException e) {
