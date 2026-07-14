@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Process
 import androidx.multidex.MultiDex
 import com.pdy.tvpro.constants.TimeConstants
+import com.pdy.tvpro.security.SecuLoader
+import com.pdy.tvpro.security.SecurityGate
 import com.pdy.tvpro.util.VerifyUtil
 import com.lzy.okgo.OkGo
 import com.lzy.okgo.https.HttpsUtils
@@ -25,12 +27,14 @@ open class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        
-        if (!VerifyUtil.verifyAll(this)) {
+
+        if (!runSecurityCheck()) {
             Process.killProcess(Process.myPid())
             return
         }
-        
+        // 防止 R8 剔除带 @Dex2C 的桩方法，确保 dex2c 至少能编译到一个方法
+        securityPing()
+
         INSTANCE = this
         val builder = OkHttpClient.Builder()
         builder.readTimeout(TimeConstants.HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS)
@@ -44,6 +48,29 @@ open class App : Application() {
         OkGo.getInstance().init(this).setOkHttpClient(builder.build())
             .setRetryCount(1)
             .addCommonHeaders(headers)
+    }
+
+    /**
+     * 优先走 dex2c 注入的 libnc.so（JNI_OnLoad + SecuLoader.verify）。
+     * 纯 Gradle 调试包尚无 nc 时，回退到旧的 libverify。
+     */
+    private fun runSecurityCheck(): Boolean {
+        return try {
+            System.loadLibrary("nc")
+            val ok = SecuLoader.verify(this)
+            if (!ok || SecurityGate.blocked) {
+                Timber.e("dex2c security check failed")
+                false
+            } else {
+                true
+            }
+        } catch (e: UnsatisfiedLinkError) {
+            Timber.w(e, "libnc missing, fallback to VerifyUtil")
+            VerifyUtil.verifyAll(this)
+        } catch (t: Throwable) {
+            Timber.e(t, "security check error")
+            false
+        }
     }
 
     override fun attachBaseContext(base: Context?) {
@@ -63,6 +90,11 @@ open class App : Application() {
 
     fun hasDlanConnect(): Boolean {
         return mDeviceInfo.status
+    }
+
+    @com.pdy.tvpro.security.Dex2C
+    fun securityPing(): Int {
+        return if (hasDlanConnect()) 1 else 0
     }
 
     open fun getDevInfo(): DeviceInfo? {
