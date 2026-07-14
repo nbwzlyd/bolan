@@ -261,10 +261,14 @@ class MediaPlayerAdapter constructor(
     }
 
     private fun release() {
+        mHandler.removeCallbacksAndMessages(null)
         player?.let {
             changeToUnitialized()
             mHasDisplay = false
-            player!!.release()
+            try {
+                player!!.release()
+            } catch (e: Exception) {
+            }
             player = null
         }
     }

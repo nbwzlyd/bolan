@@ -67,12 +67,21 @@ public:
 
     virtual NPT_Result OnPause(PLT_ActionReference& action) {
         if (g_log_enabled) LOGD("OnPause");
+        PLT_Service* service = NULL;
+        if (NPT_SUCCEEDED(g_device->FindServiceByType("urn:schemas-upnp-org:service:AVTransport:1", service)) && service) {
+            service->SetStateVariable("TransportState", "PAUSED_PLAYBACK");
+        }
         jni_callback_action(MEDIA_RENDER_CTL_MSG_PAUSE, "", "");
         return NPT_SUCCESS;
     }
 
     virtual NPT_Result OnPlay(PLT_ActionReference& action) {
         if (g_log_enabled) LOGD("OnPlay");
+        PLT_Service* service = NULL;
+        if (NPT_SUCCEEDED(g_device->FindServiceByType("urn:schemas-upnp-org:service:AVTransport:1", service)) && service) {
+            service->SetStateVariable("TransportState", "PLAYING");
+            service->SetStateVariable("TransportStatus", "OK");
+        }
         jni_callback_action(MEDIA_RENDER_CTL_MSG_PLAY, "", "");
         return NPT_SUCCESS;
     }
@@ -93,6 +102,10 @@ public:
 
     virtual NPT_Result OnStop(PLT_ActionReference& action) {
         if (g_log_enabled) LOGD("OnStop");
+        PLT_Service* service = NULL;
+        if (NPT_SUCCEEDED(g_device->FindServiceByType("urn:schemas-upnp-org:service:AVTransport:1", service)) && service) {
+            service->SetStateVariable("TransportState", "STOPPED");
+        }
         jni_callback_action(MEDIA_RENDER_CTL_MSG_STOP, "", "");
         return NPT_SUCCESS;
     }
@@ -102,6 +115,17 @@ public:
         action->GetArgumentValue("CurrentURI", uri);
         action->GetArgumentValue("CurrentURIMetaData", metadata);
         if (g_log_enabled) LOGD("OnSetAVTransportURI: %s", uri.GetChars());
+
+        // set state variables so GENA events are triggered
+        PLT_Service* service = NULL;
+        if (NPT_SUCCEEDED(g_device->FindServiceByType("urn:schemas-upnp-org:service:AVTransport:1", service)) && service) {
+            service->SetStateVariable("AVTransportURI", uri);
+            service->SetStateVariable("AVTransportURIMetaData", metadata);
+            service->SetStateVariable("CurrentTrackURI", uri);
+            service->SetStateVariable("TransportState", "TRANSITIONING");
+            service->SetStateVariable("TransportStatus", "OK");
+        }
+
         jni_callback_action(MEDIA_RENDER_CTL_MSG_SET_AV_URL, uri.GetChars(), metadata.GetChars());
         return NPT_SUCCESS;
     }

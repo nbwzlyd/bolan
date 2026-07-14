@@ -276,6 +276,7 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
         if (isControlsOverlayVisible) {
             hideControlsOverlay(false)
         }
+        DLNAGenaEventBrocastFactory.sendPlayStateEvent(App.INSTANCE)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -669,6 +670,11 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
     }
 
     override fun onDestroyView() {
+        try {
+            mTransportControlGlue.host = null
+            playerAdapter.onDetachedFromHost()
+        } catch (e: Exception) {
+        }
         super.onDestroyView()
     }
 }
