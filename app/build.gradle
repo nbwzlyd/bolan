@@ -5,7 +5,7 @@ plugins {
 apply plugin: 'kotlin-kapt'
 def appName = "大星投屏"
 def versionCodeNew = 39
-def versionNameNew = "3.0"
+def versionNameNew = "3.0.1"
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
