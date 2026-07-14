@@ -30,3 +30,9 @@ media3_migrate.py
 
 # Build artifacts
 app/src/main/jni/build-arm64/
+
+# Signing
+keystore.properties
+**/release.keystore
+**/*.jks
+**/*.keystore

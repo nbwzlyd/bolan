@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import com.hd.tvpro.app.App;
+import com.pdy.tvpro.app.App;
 import com.pngcui.skyworth.dlna.util.CommonLog;
 import com.pngcui.skyworth.dlna.util.DlnaUtils;
 import com.pngcui.skyworth.dlna.jni.PlatinumReflection;

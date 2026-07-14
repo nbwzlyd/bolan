@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-import com.hd.tvpro.R;
-import com.hd.tvpro.util.StringUtil;
+import com.pdy.tvpro.R;
+import com.pdy.tvpro.util.StringUtil;
 
 public class LocalConfigSharePreference {
 

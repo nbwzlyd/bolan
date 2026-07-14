@@ -24,8 +24,8 @@ import com.pngcui.skyworth.dlna.event.EngineCommand;
 import com.pngcui.skyworth.dlna.util.CommonLog;
 import com.pngcui.skyworth.dlna.util.DlnaUtils;
 import com.pngcui.skyworth.dlna.util.LogFactory;
-import com.hd.tvpro.R;
-import com.hd.tvpro.app.App;
+import com.pdy.tvpro.R;
+import com.pdy.tvpro.app.App;
 import com.pngcui.skyworth.dlna.jni.PlatinumReflection;
 import com.pngcui.skyworth.dlna.util.CommonUtil;
 

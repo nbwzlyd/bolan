@@ -5,7 +5,7 @@ import android.content.Intent;
 
 import com.pngcui.skyworth.dlna.event.EngineCommand;
 import com.pngcui.skyworth.dlna.util.CommonLog;
-import com.hd.tvpro.app.App;
+import com.pdy.tvpro.app.App;
 import com.pngcui.skyworth.dlna.service.MediaRenderService;
 import com.pngcui.skyworth.dlna.util.LogFactory;
 

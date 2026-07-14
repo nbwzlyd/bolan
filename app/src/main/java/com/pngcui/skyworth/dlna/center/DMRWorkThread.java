@@ -3,7 +3,7 @@ package com.pngcui.skyworth.dlna.center;
 import android.content.Context;
 
 import com.pngcui.skyworth.dlna.util.CommonLog;
-import com.hd.tvpro.app.App;
+import com.pdy.tvpro.app.App;
 import com.pngcui.skyworth.dlna.jni.PlatinumJniProxy;
 import com.pngcui.skyworth.dlna.util.CommonUtil;
 import com.pngcui.skyworth.dlna.util.LogFactory;
