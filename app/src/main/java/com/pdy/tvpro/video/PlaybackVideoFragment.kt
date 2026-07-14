@@ -160,7 +160,7 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
             }
         }
 
-        val initUrl = PreferenceMgr.getString(context, "playUrl", "file:///android_asset/test.jpg")
+        val initUrl = PreferenceMgr.getString(context, "playUrl", "")
         val initTitle = PreferenceMgr.getString(context, "playTitle", null)
         playData = DlanUrlDTO()
         playData?.url = initUrl

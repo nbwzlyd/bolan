@@ -153,6 +153,10 @@ class MainActivity : FragmentActivity() {
 
     //显示退出对话框
     fun showExitDialog() {
+        if (isFinishing || isDestroyed) {
+            return
+        }
+        dismissDialog()
         val fontSize = CommonUtil.getScreenWidth(this) / 42
         val inflater = layoutInflater
         val exitView: View = inflater.inflate(R.layout.layout_exit_dialog, null)
@@ -260,6 +264,7 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun onDestroy() {
+        dismissDialog()
         super.onDestroy()
         try {
             val intent = Intent(

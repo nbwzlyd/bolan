@@ -18,6 +18,10 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
+    buildFeatures {
+        buildConfig true
+    }
+
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {

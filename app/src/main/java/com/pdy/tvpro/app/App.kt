@@ -4,10 +4,10 @@ import android.app.Application
 import android.content.Context
 import android.os.Process
 import androidx.multidex.MultiDex
+import com.pdy.tvpro.BuildConfig
 import com.pdy.tvpro.constants.TimeConstants
 import com.pdy.tvpro.security.SecuLoader
 import com.pdy.tvpro.security.SecurityGate
-import com.pdy.tvpro.util.VerifyUtil
 import com.lzy.okgo.OkGo
 import com.lzy.okgo.https.HttpsUtils
 import com.lzy.okgo.model.HttpHeaders
@@ -51,10 +51,13 @@ open class App : Application() {
     }
 
     /**
-     * 优先走 dex2c 注入的 libnc.so（JNI_OnLoad + SecuLoader.verify）。
-     * 纯 Gradle 调试包尚无 nc 时，回退到旧的 libverify。
+     * Debug 包不做校验。
+     * Release 走 dex2c 注入的 libnc.so（JNI_OnLoad + SecuLoader.verify）。
      */
     private fun runSecurityCheck(): Boolean {
+        if (BuildConfig.DEBUG) {
+            return true
+        }
         return try {
             System.loadLibrary("nc")
             val ok = SecuLoader.verify(this)
@@ -64,9 +67,6 @@ open class App : Application() {
             } else {
                 true
             }
-        } catch (e: UnsatisfiedLinkError) {
-            Timber.w(e, "libnc missing, fallback to VerifyUtil")
-            VerifyUtil.verifyAll(this)
         } catch (t: Throwable) {
             Timber.e(t, "security check error")
             false

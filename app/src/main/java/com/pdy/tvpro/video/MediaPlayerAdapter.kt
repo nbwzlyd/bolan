@@ -169,6 +169,9 @@ class MediaPlayerAdapter constructor(
 
                 override fun onVideoSizeChanged(videoSize: VideoSize) {
                     super.onVideoSizeChanged(videoSize)
+                    if (videoSize.width==0||videoSize.height==0){
+                        return
+                    }
                     listeners.forEach {
                         it.onVideoSizeChanged(
                             this@MediaPlayerAdapter,
@@ -408,7 +411,7 @@ class MediaPlayerAdapter constructor(
         headers: Map<String, String>?,
         subtitle: String? = null
     ): Boolean {
-        if (uri == null) {
+        if (uri.isNullOrEmpty()) {
             return false
         }
         mMediaSourceUri = uri
