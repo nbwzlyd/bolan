@@ -37,7 +37,7 @@ class CastRecordHolder constructor(
             return
         }
 
-        val view = LayoutInflater.from(context).inflate(R.layout.layout_live, null)
+        val view = LayoutInflater.from(context).inflate(R.layout.layout_cast_record, null)
         val dm = DisplayMetrics()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager?
         windowManager!!.defaultDisplay.getMetrics(dm)
@@ -47,10 +47,7 @@ class CastRecordHolder constructor(
         val fontSize = width / 42
         AppConfig.fontSize = fontSize
 
-        val groupView = view.findViewById<ListView>(R.id.lv_live_group)
-        groupView.visibility = View.GONE
-
-        listView = view.findViewById(R.id.lv_setting_right)
+        listView = view.findViewById(R.id.lv_cast_record)
         val itemList = records.map {
             val dateFormat = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
             RecordItem(it.title, it.url, dateFormat.format(Date(it.time)))
@@ -62,7 +59,7 @@ class CastRecordHolder constructor(
         tvTitle.text = "投屏记录"
         tvTitle.visibility = View.VISIBLE
         tvTitle.setTextColor(Color.WHITE)
-        tvTitle.textSize = (fontSize + 3).toFloat()
+        tvTitle.textSize = (fontSize * 0.5f).toFloat()
 
         listView!!.onItemClickListener = AdapterView.OnItemClickListener { _, _, pos, _ ->
             if (pos < records.size) {
@@ -73,13 +70,14 @@ class CastRecordHolder constructor(
 
         AppConfig.liveHeight = (height - 12) / 8 - listView!!.dividerHeight + 1
 
-        popupWindow = PopupWindow(view, width / 2, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val popupHeight = height * 2 / 3
+        popupWindow = PopupWindow(view, width / 2, popupHeight)
         popupWindow?.let {
             it.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             it.isFocusable = true
             it.isOutsideTouchable = true
             it.update()
-            it.showAtLocation(anchor, Gravity.CENTER, 0, 0)
+            it.showAtLocation(anchor, Gravity.BOTTOM, 0, 50)
         }
         listView?.requestFocus()
     }
@@ -105,19 +103,17 @@ class CastRecordHolder constructor(
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val view = convertView ?: LayoutInflater.from(context)
-                .inflate(R.layout.item_list_left, parent, false)
+                .inflate(R.layout.item_cast_record, parent, false)
             val item = items[position]
-            val textView = view.findViewById<TextView>(android.R.id.text1)
+            val textView = view.findViewById<TextView>(R.id.tv_title)
             textView.text = item.title
             textView.setTextColor(Color.WHITE)
-            textView.textSize = (AppConfig.fontSize * 0.8f).toFloat()
+            textView.textSize = (AppConfig.fontSize * 0.4f).toFloat()
 
-            val subTextView = view.findViewById<TextView>(android.R.id.text2)
-            subTextView?.let {
-                it.text = item.time
-                it.setTextColor(Color.GRAY)
-                it.textSize = (AppConfig.fontSize * 0.6f).toFloat()
-            }
+            val subTextView = view.findViewById<TextView>(R.id.tv_time)
+            subTextView.text = item.time
+            subTextView.setTextColor(Color.GRAY)
+            subTextView.textSize = (AppConfig.fontSize * 0.3f).toFloat()
             return view
         }
     }

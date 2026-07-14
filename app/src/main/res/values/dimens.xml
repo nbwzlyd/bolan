@@ -12,6 +12,5 @@
     <dimen name="channel_epg_width">500sp</dimen>
     <dimen name="num_width">39sp</dimen>
     <dimen name="num_text_size">25sp</dimen>
-    
-    
+
 </resources>

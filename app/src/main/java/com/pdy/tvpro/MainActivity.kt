@@ -19,6 +19,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.pdy.tvpro.video.PlaybackVideoFragment
 import com.pdy.tvpro.app.App
+import com.pdy.tvpro.security.Dex2C
 import com.pngcui.skyworth.dlna.service.MediaRenderService
 import com.pngcui.skyworth.dlna.util.CommonUtil
 import com.smarx.notchlib.NotchScreenManager
@@ -29,6 +30,7 @@ import kotlin.math.min
 /**
  * Loads [MainFragment].
  */
+@Dex2C
 class MainActivity : FragmentActivity() {
     var isOnPause = false
     private var dialog: PopupWindow? = null
@@ -180,7 +182,7 @@ class MainActivity : FragmentActivity() {
         tv_isp.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize.toFloat())
         val tv_webadmin = exitView.findViewById<View>(R.id.tv_webadmin) as TextView
         tv_webadmin.visibility = View.VISIBLE
-        tv_webadmin.text = "扫码关注安卓哥开发，不迷路"
+        tv_webadmin.text = "   扫码关注安卓哥开发，下载最新版本"
         tv_webadmin.setTextSize(TypedValue.COMPLEX_UNIT_PX, (fontSize * 8 / 10).toFloat())
         tv_webadmin.gravity = android.view.Gravity.CENTER
         qrcodeView.setImageResource(R.drawable.exit_qrcode)
