@@ -28,7 +28,7 @@
         android:orientation="horizontal"
         android:padding="0dp">
 
-        <com.hd.tvpro.view.SelectListView
+        <com.pdy.tvpro.view.SelectListView
             android:id="@+id/lv_setting_left"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
