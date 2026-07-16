@@ -41,7 +41,7 @@ class SettingHolder constructor(
     private var subtitleFormatMap = HashMap<Int, Format>()
 
     enum class Option {
-        SCREEN, SPEED, RESET, FINISH, CAST_RECORD
+        SCREEN, SPEED, RESET, FINISH, CAST_RECORD, AUTO_PORTRAIT
     }
 
     interface SettingUpdateListener {
@@ -153,6 +153,11 @@ class SettingHolder constructor(
             startOption.mRightList.add("开启")
             settingArrayList.add(startOption)
 
+            val autoPortraitOption = SettingOption("自动竖屏")
+            autoPortraitOption.mRightList.add("关闭")
+            autoPortraitOption.mRightList.add("开启")
+            settingArrayList.add(autoPortraitOption)
+
             val recordOption = SettingOption("投屏记录")
             recordOption.mRightList.add("查看记录")
             recordOption.mRightList.add("清空记录")
@@ -203,6 +208,10 @@ class SettingHolder constructor(
                 "开机启动" -> {
                     val selfStart = PreferenceMgr.getBoolean(context, "selfStart", false)
                     mAdapterSettingValue!!.setSelection(if (selfStart) 1 else 0)
+                }
+                "自动竖屏" -> {
+                    val autoPortrait = PreferenceMgr.getBoolean(context, "autoPortrait", false)
+                    mAdapterSettingValue!!.setSelection(if (autoPortrait) 1 else 0)
                 }
                 "音频轨道" -> {
                     var audio: String? = null
@@ -276,6 +285,15 @@ class SettingHolder constructor(
                         ToastMgr.shortBottomCenter(
                             context,
                             "已" + (if (posval == 1) "开启" else "关闭") + "开机自启动"
+                        )
+                    }
+                    "自动竖屏" -> {
+                        PreferenceMgr.put(context, "autoPortrait", posval == 1)
+                        mAdapterSettingValue!!.setSelection(posval)
+                        settingUpdateListener.update(Option.AUTO_PORTRAIT)
+                        ToastMgr.shortBottomCenter(
+                            context,
+                            "已" + (if (posval == 1) "开启" else "关闭") + "自动竖屏"
                         )
                     }
                     "投屏记录" -> {

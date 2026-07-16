@@ -1,5 +1,6 @@
 package com.pdy.tvpro
 
+import android.content.pm.ActivityInfo
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -41,11 +42,16 @@ class MainActivity : FragmentActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        Log.d(TAG, "onConfigurationChanged: ")
+        Log.d(TAG, "onConfigurationChanged: orientation=${newConfig.orientation}")
+        // 旋转时关闭弹窗，避免宽高按旧方向残留
+        dismissDialog()
+        getFragment()?.onHostConfigurationChanged()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 启动时先横屏；自动竖屏开启后由 PlaybackVideoFragment 按视频分辨率切换
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         try {
             NotchScreenManager.getInstance().setDisplayInNotch(this)
         } catch (e: Exception) {

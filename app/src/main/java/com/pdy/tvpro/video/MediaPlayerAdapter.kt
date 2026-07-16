@@ -67,6 +67,10 @@ class MediaPlayerAdapter constructor(
 
     private var listeners: MutableList<Callback> = ArrayList()
     var onTracksChangedListener: TracksChangedListener? = null
+    var onVideoSizeListener: ((width: Int, height: Int, unappliedRotationDegrees: Int) -> Unit)? = null
+    private var lastNotifiedVideoWidth = 0
+    private var lastNotifiedVideoHeight = 0
+    private var lastNotifiedRotation = 0
 
     interface TracksChangedListener {
         fun onTracksChanged(tracks: androidx.media3.common.Tracks)
@@ -121,6 +125,7 @@ class MediaPlayerAdapter constructor(
                                 it.onPreparedStateChanged(this@MediaPlayerAdapter)
                             }
                             playStartTask?.run()
+                            refreshVideoSizeIfPossible()
                         }
                         Player.STATE_BUFFERING -> {
                             listeners.forEach {
@@ -169,16 +174,7 @@ class MediaPlayerAdapter constructor(
 
                 override fun onVideoSizeChanged(videoSize: VideoSize) {
                     super.onVideoSizeChanged(videoSize)
-                    if (videoSize.width==0||videoSize.height==0){
-                        return
-                    }
-                    listeners.forEach {
-                        it.onVideoSizeChanged(
-                            this@MediaPlayerAdapter,
-                            videoSize.width,
-                            videoSize.height
-                        )
-                    }
+                    notifyVideoSize(videoSize.width, videoSize.height, videoSize.unappliedRotationDegrees)
                 }
             })
 
@@ -215,6 +211,41 @@ class MediaPlayerAdapter constructor(
         if (listeners.isEmpty() || (callback != null && !listeners.contains(callback))) {
             listeners.add(callback)
         }
+    }
+
+    private fun notifyVideoSize(width: Int, height: Int, unappliedRotationDegrees: Int) {
+        if (width <= 0 || height <= 0) {
+            return
+        }
+        if (width == lastNotifiedVideoWidth && height == lastNotifiedVideoHeight
+            && unappliedRotationDegrees == lastNotifiedRotation
+        ) {
+            return
+        }
+        lastNotifiedVideoWidth = width
+        lastNotifiedVideoHeight = height
+        lastNotifiedRotation = unappliedRotationDegrees
+        onVideoSizeListener?.invoke(width, height, unappliedRotationDegrees)
+        listeners.forEach {
+            it.onVideoSizeChanged(
+                this@MediaPlayerAdapter,
+                width,
+                height
+            )
+        }
+    }
+
+    fun getCurrentVideoSize(): Triple<Int, Int, Int>? {
+        val size = player?.videoSize ?: return null
+        if (size.width <= 0 || size.height <= 0) {
+            return null
+        }
+        return Triple(size.width, size.height, size.unappliedRotationDegrees)
+    }
+
+    fun refreshVideoSizeIfPossible() {
+        val size = player?.videoSize ?: return
+        notifyVideoSize(size.width, size.height, size.unappliedRotationDegrees)
     }
 
     fun loadResizeMode() {

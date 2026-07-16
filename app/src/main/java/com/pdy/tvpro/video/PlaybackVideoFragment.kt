@@ -1,5 +1,7 @@
 package com.pdy.tvpro.video
 
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.content.Context
 import android.graphics.Color
 import android.media.AudioManager
@@ -84,6 +86,10 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
     private var isLongPressRight = false
     private var longPressJob: Job? = null
     private var castRecordHolder: CastRecordHolder? = null
+    private var lastVideoWidth: Int = 0
+    private var lastVideoHeight: Int = 0
+    private var lastVideoRotation: Int = 0
+    private var portraitModeApplied: Boolean = false
 
     private var webDlanData: DlanUrlDTO? = null
 
@@ -139,6 +145,12 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
                     playData?.subtitle
                 })
             }
+        }
+        playerAdapter.onVideoSizeListener = { width, height, rotation ->
+            lastVideoWidth = width
+            lastVideoHeight = height
+            lastVideoRotation = rotation
+            applyAutoPortraitMode()
         }
         playerAdapter.setRepeatAction(PlaybackControlsRow.RepeatAction.INDEX_NONE)
 
@@ -208,6 +220,12 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
                 } else {
                     DLNAGenaEventBrocastFactory.sendPauseStateEvent(App.INSTANCE)
                 }
+            }
+
+            override fun onVideoSizeChanged(adapter: PlayerAdapter?, width: Int, height: Int) {
+                lastVideoWidth = width
+                lastVideoHeight = height
+                applyAutoPortraitMode()
             }
         })
         scope.launch {
@@ -577,6 +595,10 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
                             SettingHolder.Option.SPEED -> {
                                 playerAdapter.loadSpeed()
                             }
+                            SettingHolder.Option.AUTO_PORTRAIT -> {
+                                playerAdapter.refreshVideoSizeIfPossible()
+                                applyAutoPortraitMode()
+                            }
                             SettingHolder.Option.RESET -> {
                                 if (useDlan) {
                                     useDlan = false
@@ -612,6 +634,119 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
             return
         }
         settingHolder!!.show(videoView, playData?.url, trackHolder)
+    }
+
+    fun onHostConfigurationChanged() {
+        if (settingHolder?.isShowing() == true) {
+            settingHolder?.hide()
+        }
+        if (castRecordHolder?.isShowing() == true) {
+            castRecordHolder?.hide()
+        }
+        if (isControlsOverlayVisible) {
+            hideControlsOverlay(false)
+        }
+        // 系统方向变化后，按当前策略重算一次（含 TV 旋转兜底）
+        applyAutoPortraitMode()
+    }
+
+    private fun isPortraitVideo(width: Int, height: Int, rotation: Int): Boolean {
+        if (width <= 0 || height <= 0) {
+            return false
+        }
+        // 手机竖屏视频常以横屏编码 + 90/270 旋转元数据
+        val swapped = (rotation % 180) != 0
+        val displayWidth = if (swapped) height else width
+        val displayHeight = if (swapped) width else height
+        return displayHeight > displayWidth
+    }
+
+    private fun applyAutoPortraitMode() {
+        val act = activity ?: return
+        if (act.isFinishing) {
+            return
+        }
+        // 设置刚打开时可能还没有尺寸，尝试从播放器再读一次
+        if (lastVideoWidth <= 0 || lastVideoHeight <= 0) {
+            val size = playerAdapter.getCurrentVideoSize()
+            if (size != null) {
+                lastVideoWidth = size.first
+                lastVideoHeight = size.second
+                lastVideoRotation = size.third
+            }
+        }
+        val autoPortrait = PreferenceMgr.getBoolean(requireContext(), "autoPortrait", false)
+        val shouldPortrait = autoPortrait && isPortraitVideo(lastVideoWidth, lastVideoHeight, lastVideoRotation)
+        Log.i(
+            TAG,
+            "applyAutoPortraitMode auto=$autoPortrait size=${lastVideoWidth}x${lastVideoHeight}" +
+                " rot=$lastVideoRotation shouldPortrait=$shouldPortrait"
+        )
+        val targetOrientation = if (shouldPortrait) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+        if (act.requestedOrientation != targetOrientation) {
+            act.requestedOrientation = targetOrientation
+        }
+        // TV 盒子经常忽略 setRequestedOrientation，用根布局旋转兜底
+        applyPortraitLayoutFallback(shouldPortrait)
+        if (shouldPortrait != portraitModeApplied) {
+            portraitModeApplied = shouldPortrait
+            if (autoPortrait) {
+                ToastMgr.shortBottomCenter(
+                    requireContext(),
+                    if (shouldPortrait) "已切换竖屏模式" else "已恢复横屏模式"
+                )
+            }
+        }
+        // 方向变化后强制刷新播放与控制栏布局
+        view?.post {
+            videoView.requestLayout()
+            view?.requestLayout()
+        }
+    }
+
+    /**
+     * 当系统仍保持横屏时，旋转内容根视图实现视觉竖屏（兼容 TV/盒子）。
+     */
+    private fun applyPortraitLayoutFallback(enable: Boolean) {
+        val act = activity ?: return
+        val content = act.findViewById<ViewGroup>(android.R.id.content) ?: return
+        val root = content.getChildAt(0) ?: return
+        root.post {
+            val dm = act.resources.displayMetrics
+            val screenW = dm.widthPixels
+            val screenH = dm.heightPixels
+            val orientation = act.resources.configuration.orientation
+            val systemIsPortrait = orientation == Configuration.ORIENTATION_PORTRAIT
+            if (enable && !systemIsPortrait) {
+                // 系统没转过来：把内容旋转 90 度铺满物理屏幕
+                val lp = root.layoutParams
+                lp.width = screenH
+                lp.height = screenW
+                root.layoutParams = lp
+                root.pivotX = 0f
+                root.pivotY = 0f
+                root.rotation = 90f
+                root.translationX = screenW.toFloat()
+                root.translationY = 0f
+                Log.i(TAG, "portrait fallback rotate applied ${screenW}x${screenH}")
+            } else {
+                val lp = root.layoutParams
+                lp.width = ViewGroup.LayoutParams.MATCH_PARENT
+                lp.height = ViewGroup.LayoutParams.MATCH_PARENT
+                root.layoutParams = lp
+                root.rotation = 0f
+                root.translationX = 0f
+                root.translationY = 0f
+                root.pivotX = root.width / 2f
+                root.pivotY = root.height / 2f
+            }
+            root.requestLayout()
+            content.requestLayout()
+        }
     }
 
     companion object {
