@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.*
 import android.widget.AdapterView
@@ -15,6 +14,7 @@ import androidx.media3.common.C
 import androidx.media3.common.Format
 import com.pdy.tvpro.R
 import com.pdy.tvpro.constants.AppConfig
+import com.pdy.tvpro.util.PopupLayoutHelper
 import com.pdy.tvpro.util.PreferenceMgr
 import com.pdy.tvpro.util.ShareUtil
 import com.pdy.tvpro.util.StringUtil
@@ -348,15 +348,10 @@ class SettingHolder constructor(
         trackHolder: TrackHolder? = null
     ) {
         settingView = LayoutInflater.from(context).inflate(R.layout.layout_setting, null)
-        val dm = DisplayMetrics()
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager?
-        windowManager!!.defaultDisplay.getMetrics(dm)
-        val width: Int = dm.widthPixels
-        val height: Int = dm.heightPixels
-
-
-        val fontSize = width / 42
+        val layout = PopupLayoutHelper.metrics(context)
+        val fontSize = layout.fontSize
         AppConfig.fontSize = fontSize
+        AppConfig.settingHeight = layout.rowHeight
         mSettingList = settingView!!.findViewById<View>(R.id.lv_setting_left) as SelectListView
         setSettingText(0, nowUrl, trackHolder)
         mSettingList.requestFocus()
@@ -389,9 +384,16 @@ class SettingHolder constructor(
             mSettingList.setSelect(pos, 0)
         }
 
-        AppConfig.settingHeight = height / 12 - mSettingList.dividerHeight
+        val divider = mSettingList.dividerHeight
+        if (divider > 0) {
+            AppConfig.settingHeight = (layout.rowHeight - divider).coerceAtLeast(layout.fontSize * 2)
+        }
 
-        settingWindow = PopupWindow(settingView, width / 2, ViewGroup.LayoutParams.WRAP_CONTENT)
+        // 必须给明确高度，layout_weight 才能生效，列表在竖/横屏都能滚动且不超出屏幕
+        val itemCount = settingArrayList.size.coerceAtLeast(6)
+        val contentHeight = layout.rowHeight * itemCount + layout.fontSize * 3
+        val popupHeight = contentHeight.coerceIn(layout.rowHeight * 6, layout.popupMaxHeight)
+        settingWindow = PopupWindow(settingView, layout.popupWidth, popupHeight)
         settingWindow?.let {
             it.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             it.isFocusable = true

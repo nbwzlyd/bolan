@@ -20,6 +20,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.pdy.tvpro.video.PlaybackVideoFragment
 import com.pdy.tvpro.app.App
+import com.pdy.tvpro.util.PopupLayoutHelper
 import com.pdy.tvpro.security.Dex2C
 import com.pngcui.skyworth.dlna.service.MediaRenderService
 import com.pngcui.skyworth.dlna.util.CommonUtil
@@ -165,7 +166,8 @@ class MainActivity : FragmentActivity() {
             return
         }
         dismissDialog()
-        val fontSize = CommonUtil.getScreenWidth(this) / 42
+        val popupLayout = PopupLayoutHelper.metrics(this)
+        val fontSize = popupLayout.fontSize
         val inflater = layoutInflater
         val exitView: View = inflater.inflate(R.layout.layout_exit_dialog, null)
         val tv_isp = exitView.findViewById<View>(R.id.tv_isp) as TextView
@@ -174,12 +176,16 @@ class MainActivity : FragmentActivity() {
         val qrcodeView = exitView.findViewById<View>(R.id.qrcodeView) as ImageView
 
         val qrParams: ViewGroup.LayoutParams = qrcodeView.layoutParams
-        qrParams.height = min(CommonUtil.getScreenWidth(this), CommonUtil.getScreenHeight(this)) / 3
+        qrParams.height = if (popupLayout.isPortrait) {
+            min(popupLayout.screenWidth, popupLayout.screenHeight) / 5
+        } else {
+            min(popupLayout.screenWidth, popupLayout.screenHeight) / 3
+        }
         qrParams.width = qrParams.height
         qrcodeView.layoutParams = qrParams
 
         val params: ViewGroup.LayoutParams = btn_exit.layoutParams
-        params.height = CommonUtil.getScreenHeight(this) / 10
+        params.height = popupLayout.dialogButtonHeight
         btn_exit.layoutParams = params
         btn_setting.layoutParams = params
         btn_exit.setTextSize(TypedValue.COMPLEX_UNIT_PX, (fontSize * 12 / 10).toFloat())
@@ -207,7 +213,7 @@ class MainActivity : FragmentActivity() {
         dialog =
             PopupWindow(
                 exitView,
-                CommonUtil.getScreenWidth(this) * 3 / 5,
+                popupLayout.dialogWidth,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         dialog?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -221,14 +227,15 @@ class MainActivity : FragmentActivity() {
     //显示退出对话框
     fun showHelpDialog() {
         hideHelpDialog()
-        val fontSize = CommonUtil.getScreenWidth(this) / 42
+        val popupLayout = PopupLayoutHelper.metrics(this)
+        val fontSize = popupLayout.fontSize
         val inflater = layoutInflater
         val exitView: View = inflater.inflate(R.layout.layout_help_dialog, null)
         val tv_isp = exitView.findViewById<View>(R.id.tv_isp) as TextView
         val btn_exit = exitView.findViewById<View>(R.id.btn_exit) as Button
         val btn_setting = exitView.findViewById<View>(R.id.btn_setting) as Button
         val params: ViewGroup.LayoutParams = btn_exit.layoutParams
-        params.height = CommonUtil.getScreenHeight(this) / 10
+        params.height = popupLayout.dialogButtonHeight
         btn_exit.layoutParams = params
         btn_setting.layoutParams = params
         btn_exit.setTextSize(TypedValue.COMPLEX_UNIT_PX, (fontSize * 12 / 10).toFloat())
@@ -255,7 +262,7 @@ class MainActivity : FragmentActivity() {
         dialog =
             PopupWindow(
                 exitView,
-                CommonUtil.getScreenWidth(this) * 3 / 5,
+                popupLayout.dialogWidth,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         dialog?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))

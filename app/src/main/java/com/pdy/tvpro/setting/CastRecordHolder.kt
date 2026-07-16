@@ -3,18 +3,25 @@ package com.pdy.tvpro.setting
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.util.DisplayMetrics
-import android.view.*
-import android.widget.*
+import android.util.TypedValue
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.BaseAdapter
+import android.widget.ListView
+import android.widget.PopupWindow
+import android.widget.TextView
 import com.pdy.tvpro.R
 import com.pdy.tvpro.constants.AppConfig
 import com.pdy.tvpro.model.CastRecord
 import com.pdy.tvpro.util.CastRecordMgr
+import com.pdy.tvpro.util.PopupLayoutHelper
 import com.pdy.tvpro.util.ToastMgr
 import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.math.max
-import kotlin.math.min
+import java.util.Date
+import java.util.Locale
 
 class CastRecordHolder constructor(
     private val context: Context,
@@ -38,28 +45,24 @@ class CastRecordHolder constructor(
         }
 
         val view = LayoutInflater.from(context).inflate(R.layout.layout_cast_record, null)
-        val dm = DisplayMetrics()
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager?
-        windowManager!!.defaultDisplay.getMetrics(dm)
-        val width = max(dm.widthPixels, dm.heightPixels)
-        val height = min(dm.widthPixels, dm.heightPixels)
-
-        val fontSize = width / 42
+        val layout = PopupLayoutHelper.metrics(context)
+        val fontSize = layout.fontSize
         AppConfig.fontSize = fontSize
+        AppConfig.liveHeight = layout.rowHeight
 
         listView = view.findViewById(R.id.lv_cast_record)
         val itemList = records.map {
             val dateFormat = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
             RecordItem(it.title, it.url, dateFormat.format(Date(it.time)))
         }
-        adapter = RecordListAdapter(context, itemList)
+        adapter = RecordListAdapter(context, itemList, fontSize)
         listView!!.adapter = adapter
 
         val tvTitle = view.findViewById<TextView>(R.id.tv_setting)
         tvTitle.text = "投屏记录"
         tvTitle.visibility = View.VISIBLE
         tvTitle.setTextColor(Color.WHITE)
-        tvTitle.textSize = (fontSize * 0.5f).toFloat()
+        tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, (fontSize * 0.9f))
 
         listView!!.onItemClickListener = AdapterView.OnItemClickListener { _, _, pos, _ ->
             if (pos < records.size) {
@@ -68,16 +71,19 @@ class CastRecordHolder constructor(
             }
         }
 
-        AppConfig.liveHeight = (height - 12) / 8 - listView!!.dividerHeight + 1
+        // 竖屏用更大占比宽度 + 适中高度，避免写死横屏 max/min 导致溢出
+        val popupWidth = layout.popupWidth
+        val popupHeight = layout.bottomSheetHeight
+        val gravity = if (layout.isPortrait) Gravity.CENTER else Gravity.BOTTOM
+        val yOff = if (layout.isPortrait) 0 else 50
 
-        val popupHeight = height * 2 / 3
-        popupWindow = PopupWindow(view, width / 2, popupHeight)
+        popupWindow = PopupWindow(view, popupWidth, popupHeight)
         popupWindow?.let {
             it.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             it.isFocusable = true
             it.isOutsideTouchable = true
             it.update()
-            it.showAtLocation(anchor, Gravity.BOTTOM, 0, 50)
+            it.showAtLocation(anchor, gravity, 0, yOff)
         }
         listView?.requestFocus()
     }
@@ -92,7 +98,8 @@ class CastRecordHolder constructor(
 
     inner class RecordListAdapter(
         private val context: Context,
-        private val items: List<RecordItem>
+        private val items: List<RecordItem>,
+        private val fontSize: Int
     ) : BaseAdapter() {
 
         override fun getCount(): Int = items.size
@@ -108,12 +115,18 @@ class CastRecordHolder constructor(
             val textView = view.findViewById<TextView>(R.id.tv_title)
             textView.text = item.title
             textView.setTextColor(Color.WHITE)
-            textView.textSize = (AppConfig.fontSize * 0.4f).toFloat()
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize * 0.75f)
 
             val subTextView = view.findViewById<TextView>(R.id.tv_time)
             subTextView.text = item.time
             subTextView.setTextColor(Color.GRAY)
-            subTextView.textSize = (AppConfig.fontSize * 0.3f).toFloat()
+            subTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize * 0.55f)
+
+            // 保证行高在竖屏下不会过大
+            val minH = AppConfig.liveHeight
+            if (minH > 0) {
+                view.minimumHeight = minH
+            }
             return view
         }
     }

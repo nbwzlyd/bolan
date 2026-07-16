@@ -30,8 +30,8 @@ allprojects {
         targetSdkVersion = 30
         buildToolsVersion = '35.0.0'
         minSdkVersion = 23
-        versionCode = 38
-        versionName = "3.0"
+        versionCode = 40
+        versionName = "3.0.2"
         publish_version = '2.1.91'
     }
 }
