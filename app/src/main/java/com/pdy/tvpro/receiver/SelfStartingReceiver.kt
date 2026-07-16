@@ -4,24 +4,24 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.pdy.tvpro.MainActivity
-import com.pdy.tvpro.util.PreferenceMgr
+import com.pdy.tvpro.util.SelfStartHelper
 
 /**
- * 作者：By 15968
- * 日期：On 2022/6/29
- * 时间：At 18:54
+ * 开机自启：仅启动投屏服务（DMR），不打开界面。
+ * 真正有投屏时由 [com.pngcui.skyworth.dlna.center.CastPlayerLauncher] 再拉起 MainActivity。
+ * 若开机时网络未就绪，由 [SelfStartHelper] 在网络可用时补救。
  */
 class SelfStartingReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        val selfStart = PreferenceMgr.getBoolean(context, "selfStart", false)
-        Log.d(Companion.TAG, "onReceive: ")
-        if (selfStart) {
-            val bootIntent = Intent(context, MainActivity::class.java)
-            // 这里必须为FLAG_ACTIVITY_NEW_TASK
-            bootIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(bootIntent)
+        val action = intent?.action
+        if (action != Intent.ACTION_BOOT_COMPLETED
+            && action != "android.intent.action.QUICKBOOT_POWERON"
+            && action != "com.htc.intent.action.QUICKBOOT_POWERON"
+        ) {
+            return
         }
+        Log.d(TAG, "onReceive action=$action")
+        SelfStartHelper.startCastServiceIfEnabled(context, "boot:$action")
     }
 
     companion object {

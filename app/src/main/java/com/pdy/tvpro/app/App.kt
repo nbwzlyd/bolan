@@ -6,6 +6,7 @@ import android.os.Process
 import androidx.multidex.MultiDex
 import com.pdy.tvpro.BuildConfig
 import com.pdy.tvpro.constants.TimeConstants
+import com.pdy.tvpro.util.SelfStartHelper
 import com.pdy.tvpro.security.SecuLoader
 import com.pdy.tvpro.security.SecurityGate
 import com.lzy.okgo.OkGo
@@ -48,6 +49,9 @@ open class App : Application() {
         OkGo.getInstance().init(this).setOkHttpClient(builder.build())
             .setRetryCount(1)
             .addCommonHeaders(headers)
+
+        // 网络就绪时补救开机自启（仅 selfStart 开启时拉起投屏服务）
+        SelfStartHelper.installNetworkRestore(this)
     }
 
     /**

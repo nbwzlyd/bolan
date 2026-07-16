@@ -89,6 +89,8 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
     private var lastVideoWidth: Int = 0
     private var lastVideoHeight: Int = 0
     private var lastVideoRotation: Int = 0
+    private var lastDlnaUrl: String? = null
+    private var lastDlnaPlayAt: Long = 0L
     private var portraitModeApplied: Boolean = false
 
     private var webDlanData: DlanUrlDTO? = null
@@ -279,10 +281,26 @@ class PlaybackVideoFragment : androidx.leanback.app.VideoSupportFragment(),
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onDlan(media: DlnaMediaModel) {
+        playDlnaMedia(media)
+    }
+
+    /**
+     * 播放 DLNA 投屏内容。供 EventBus 与 MainActivity 冷启动拉起共用。
+     */
+    fun playDlnaMedia(media: DlnaMediaModel) {
         Log.d(TAG, "onDlan: " + Gson().toJson(media))
         if (activity?.isFinishing == true) {
             return
         }
+        val incomingUrl = media.url ?: ""
+        val now = System.currentTimeMillis()
+        // EventBus + 拉起界面可能连续投递两次，短时间同 URL 去重
+        if (incomingUrl.isNotEmpty() && incomingUrl == lastDlnaUrl && now - lastDlnaPlayAt < 1500) {
+            Log.d(TAG, "playDlnaMedia: skip duplicate url within 1.5s")
+            return
+        }
+        lastDlnaUrl = incomingUrl
+        lastDlnaPlayAt = now
         useDlan = true
         playData = DlanUrlDTO()
         playData?.apply {

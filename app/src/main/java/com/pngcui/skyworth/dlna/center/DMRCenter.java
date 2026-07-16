@@ -65,7 +65,9 @@ public class DMRCenter implements PlatinumReflection.ActionReflectionListener, I
 
         DlnaMediaModel mediaInfo = DlnaMediaModelFactory.createFromMetaData(data);
         mediaInfo.setUrl(value);
+        // 若播放界面已在，EventBus 直接播放；若仅后台服务在跑，再拉起界面
         EventBus.getDefault().post(mediaInfo);
+        CastPlayerLauncher.launch(mContext, mediaInfo);
         DLNAGenaEventBrocastFactory.sendTranstionEvent(mContext);
     }
 

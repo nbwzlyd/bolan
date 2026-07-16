@@ -23,6 +23,9 @@ import com.pdy.tvpro.app.App
 import com.pdy.tvpro.util.PopupLayoutHelper
 import com.pdy.tvpro.security.Dex2C
 import com.pngcui.skyworth.dlna.service.MediaRenderService
+import org.greenrobot.eventbus.EventBus
+import com.pngcui.skyworth.dlna.center.DlnaMediaModelFactory
+import com.pngcui.skyworth.dlna.center.CastPlayerLauncher
 import com.pngcui.skyworth.dlna.util.CommonUtil
 import com.smarx.notchlib.NotchScreenManager
 import kotlinx.coroutines.*
@@ -65,7 +68,7 @@ class MainActivity : FragmentActivity() {
                 .commit()
         }
 
-        val intent = Intent(
+        val serviceIntent = Intent(
             this,
             MediaRenderService::class.java
         )
@@ -74,12 +77,52 @@ class MainActivity : FragmentActivity() {
             withContext(Dispatchers.Main) {
                 if (!isFinishing) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        startForegroundService(intent)
+                        startForegroundService(serviceIntent)
                     } else {
-                        startService(intent)
+                        startService(serviceIntent)
                     }
                 }
             }
+        }
+
+        // 若由投屏服务拉起，带上媒体地址开始播放
+        handleCastIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleCastIntent(intent)
+    }
+
+    /**
+     * 处理由投屏服务拉起时带入的媒体信息（冷启动或界面已在后台）。
+     */
+    private fun handleCastIntent(intent: Intent?) {
+        if (intent == null) {
+            return
+        }
+        val fromCast = intent.getBooleanExtra(CastPlayerLauncher.EXTRA_FROM_CAST, false)
+        val url = intent.getStringExtra(DlnaMediaModelFactory.PARAM_GET_URL)
+        if (!fromCast || url.isNullOrEmpty()) {
+            return
+        }
+        val media = DlnaMediaModelFactory.createFromIntent(intent)
+        // 清掉标记，避免旋转/重建时重复触发
+        intent.removeExtra(CastPlayerLauncher.EXTRA_FROM_CAST)
+        lifecycleScope.launch {
+            // 等待 PlaybackVideoFragment 完成 EventBus 注册与视图创建
+            repeat(30) {
+                val fragment = getFragment()
+                if (fragment != null && fragment.view != null) {
+                    fragment.playDlnaMedia(media)
+                    return@launch
+                }
+                delay(50)
+            }
+            // 兜底：再走 EventBus
+            EventBus.getDefault().post(media)
+            Log.w(TAG, "handleCastIntent: fragment not ready, posted EventBus")
         }
     }
 

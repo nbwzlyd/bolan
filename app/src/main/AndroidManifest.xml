@@ -41,6 +41,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:banner="@mipmap/ic_launcher"
             android:configChanges="orientation|keyboardHidden|screenSize|screenLayout"
             android:icon="@mipmap/ic_launcher"
@@ -73,7 +74,9 @@
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" /> <!-- 开机广播 -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
